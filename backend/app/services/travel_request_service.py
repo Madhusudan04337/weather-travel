@@ -100,18 +100,11 @@ class TravelRequestService:
             weather_summary = await weather_svc.get_weather_summary(
                 data.destination_city, data.travel_date
             )
-            weather_data = weather_summary.model_dump()
             
-            # Since the repository hardcodes "weather": None on create and doesn't
-            # expose weather in the update schema, we update the document directly.
-            oid = self._repo._to_object_id(model.id)
-            if oid:
-                await self._repo._col.update_one(
-                    {"_id": oid},
-                    {"$set": {"weather": weather_data}}
-                )
-                model.weather = weather_data
-                logger.info("Attached weather summary to travel request %s", model.id)
+            # Delegate MongoDB update to the repository's public API
+            updated = await self._repo.update_weather(model.id, weather_summary)
+            if updated:
+                model.weather = weather_summary.model_dump()
         except Exception as exc:
             # We don't want a weather failure to fail the whole creation
             logger.warning("Failed to attach weather summary: %s", exc)

@@ -34,6 +34,7 @@ from app.core.constants import TRAVEL_REQUEST_COLLECTION
 from app.core.exceptions import RepositoryError
 from app.models.travel_request import TravelRequestModel, TravelRequestStatus
 from app.schemas.travel_request import TravelRequestCreate, TravelRequestUpdate
+from app.schemas.weather import WeatherSummary
 
 logger = logging.getLogger(__name__)
 
@@ -303,6 +304,47 @@ class TravelRequestRepository:
         except PyMongoError as exc:
             logger.exception("MongoDB error during update(%s)", id)
             raise RepositoryError("update", str(exc)) from exc
+
+    async def update_weather(self, id: str, weather: WeatherSummary) -> bool:
+        """
+        Update the weather field for a specific travel request document.
+
+        Parameters
+        ----------
+        id:
+            String ObjectId of the document to update.
+        weather:
+            The WeatherSummary schema object to embed in the document.
+
+        Returns
+        -------
+        bool
+            ``True`` if the document was updated, ``False`` if not found.
+
+        Raises
+        ------
+        RepositoryError
+            If the database operation fails.
+        """
+        oid = self._to_object_id(id)
+        if oid is None:
+            logger.debug("update_weather: '%s' is not a valid ObjectId", id)
+            return False
+
+        try:
+            result = await self._col.update_one(
+                {"_id": oid},
+                {"$set": {"weather": weather.model_dump()}}
+            )
+            updated = result.modified_count == 1
+            if updated:
+                logger.info("Updated weather for travel request %s", id)
+            else:
+                logger.debug("update_weather: document '%s' not found or unmodified", id)
+            return updated
+        except PyMongoError as exc:
+            logger.exception("MongoDB error during update_weather(%s)", id)
+            raise RepositoryError("update_weather", str(exc)) from exc
 
     async def delete(self, id: str) -> bool:
         """
