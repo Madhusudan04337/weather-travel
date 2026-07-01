@@ -38,6 +38,8 @@ from app.schemas.travel_request import (
 logger = logging.getLogger(__name__)
 
 
+from app.services.weather_service import WeatherService
+
 class TravelRequestService:
     """
     Orchestrates travel request operations and enforces business rules.
@@ -47,10 +49,17 @@ class TravelRequestService:
     repo:
         A ``TravelRequestRepository`` instance injected by FastAPI's
         dependency system.
+    weather_service:
+        A ``WeatherService`` instance injected by FastAPI.
     """
 
-    def __init__(self, repo: TravelRequestRepository) -> None:
+    def __init__(
+        self,
+        repo: TravelRequestRepository,
+        weather_service: WeatherService,
+    ) -> None:
         self._repo = repo
+        self._weather_service = weather_service
 
     # ── Public methods ────────────────────────────────────────────────────────
 
@@ -84,8 +93,6 @@ class TravelRequestService:
         self._validate_travel_date(data.travel_date)
         self._validate_notes(data.special_needs, data.notes)
 
-        from app.services.weather_service import WeatherService
-        
         try:
             model = await self._repo.create(data)
         except RepositoryError as exc:
@@ -96,8 +103,7 @@ class TravelRequestService:
 
         # ── Fetch and store weather data ──────────────────────────────────────
         try:
-            weather_svc = WeatherService()
-            weather_summary = await weather_svc.get_weather_summary(
+            weather_summary = await self._weather_service.get_weather_summary(
                 data.destination_city, data.travel_date
             )
             
