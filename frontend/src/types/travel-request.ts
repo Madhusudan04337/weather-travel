@@ -19,15 +19,45 @@ export const TravelRequestStatus = {
 } as const;
 export type TravelRequestStatus = typeof TravelRequestStatus[keyof typeof TravelRequestStatus];
 
+export interface WeatherLocation {
+  name: string;
+  latitude: number;
+  longitude: number;
+  country: string | null;
+}
+
+export interface WeatherForecast {
+  date: string;
+  temperature_max: number;
+  temperature_min: number;
+  precipitation_probability: number;
+  weather_code: number;
+  weather_description: string;
+}
+
+export interface WeatherSummary {
+  location: WeatherLocation;
+  forecast: WeatherForecast;
+}
+
+export interface Recommendation {
+  suitable: boolean;
+  title: string;
+  message: string;
+  risk_level: "low" | "medium" | "high";
+}
+
 export interface TravelRequest {
   id: string;
   destination_city: string;
   travel_date: string;
-  trip_type: TripType;
-  budget_range: BudgetRange;
+  trip_type: (typeof TripType)[keyof typeof TripType];
+  budget_range: (typeof BudgetRange)[keyof typeof BudgetRange];
   special_needs: boolean;
-  notes?: string;
-  status: TravelRequestStatus;
+  notes: string | null;
+  status: (typeof TravelRequestStatus)[keyof typeof TravelRequestStatus];
+  weather?: WeatherSummary | null;
+  recommendation?: Recommendation | null;
   created_at: string;
   updated_at: string;
 }

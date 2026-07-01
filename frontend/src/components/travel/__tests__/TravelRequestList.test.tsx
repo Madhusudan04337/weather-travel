@@ -14,10 +14,11 @@ const mockRequests: TravelRequest[] = [
   {
     id: "1",
     destination_city: "Paris",
-    travel_date: "2026-10-01",
+    travel_date: "2026-08-15",
     trip_type: TripType.VACATION,
     budget_range: BudgetRange.HIGH,
     special_needs: false,
+    notes: null,
     status: TravelRequestStatus.APPROVED,
     created_at: "2026-07-01",
     updated_at: "2026-07-01",

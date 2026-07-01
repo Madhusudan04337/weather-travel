@@ -29,30 +29,45 @@ export function TravelRequestCard({
 
   return (
     <div className="rounded-card border border-border bg-surface p-6 shadow-sm transition-shadow hover:shadow-md">
-      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-        <div>
-          <div className="mb-2 flex items-center gap-3">
-            <h3 className="text-heading-m font-bold text-text-primary">
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-card-title font-bold text-text-primary">
               {request.destination_city}
             </h3>
-            <StatusBadge status={request.status} />
+            <p className="text-small text-text-secondary mt-1">
+              {travelDate} • {request.trip_type}
+            </p>
           </div>
-          <div className="flex flex-wrap gap-x-6 gap-y-2 text-body-sm text-text-secondary">
-            <div className="flex items-center gap-1.5">
-              <span className="font-medium text-text-primary">Date:</span>
-              {travelDate}
+          <StatusBadge status={request.status} />
+        </div>
+        
+        {/* Recommendation & Weather Section */}
+        {request.weather && request.recommendation && (
+          <div className="mt-4 p-3 rounded-lg bg-background border border-border">
+            <div className="flex items-center justify-between mb-2">
+              <span className="font-semibold text-small text-text-primary">
+                {request.weather.forecast.weather_description}
+              </span>
+              <RiskBadge riskLevel={request.recommendation.risk_level} />
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className="font-medium text-text-primary">Type:</span>
-              <span className="capitalize">{request.trip_type}</span>
+            <p className="text-caption text-text-secondary">
+              {request.recommendation.message}
+            </p>
+            <div className="mt-2 text-caption text-text-muted flex gap-3">
+              <span>{request.weather.forecast.temperature_min}°C - {request.weather.forecast.temperature_max}°C</span>
+              <span>Precipitation: {request.weather.forecast.precipitation_probability}%</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className="font-medium text-text-primary">Budget:</span>
-              <span className="capitalize">{request.budget_range}</span>
-            </div>
-            <div className="flex items-center gap-1.5 text-text-muted">
-              <span>Created {createdAt}</span>
-            </div>
+          </div>
+        )}
+
+        <div className="flex flex-wrap gap-x-6 gap-y-2 text-body-sm text-text-secondary">
+          <div className="flex items-center gap-1.5">
+            <span className="font-medium text-text-primary">Budget:</span>
+            <span className="capitalize">{request.budget_range}</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-text-muted">
+            <span>Created {createdAt}</span>
           </div>
         </div>
 
@@ -81,5 +96,38 @@ export function TravelRequestCard({
         </div>
       </div>
     </div>
+  );
+}
+
+// ── Internal RiskBadge Component ─────────────────────────────────────────────
+
+function RiskBadge({ riskLevel }: { riskLevel: "low" | "medium" | "high" }) {
+  let styles = "";
+  let icon = "";
+  let label = "";
+
+  switch (riskLevel) {
+    case "low":
+      styles = "bg-success/10 text-success border-success/20";
+      icon = "🟢";
+      label = "Low Risk";
+      break;
+    case "medium":
+      styles = "bg-warning/10 text-warning border-warning/20";
+      icon = "🟡";
+      label = "Medium Risk";
+      break;
+    case "high":
+      styles = "bg-error/10 text-error border-error/20";
+      icon = "🔴";
+      label = "High Risk";
+      break;
+  }
+
+  return (
+    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-caption font-medium border ${styles}`}>
+      <span aria-hidden="true">{icon}</span>
+      {label}
+    </span>
   );
 }
