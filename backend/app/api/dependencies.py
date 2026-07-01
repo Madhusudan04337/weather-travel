@@ -9,8 +9,6 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from app.core.database import get_database
 from app.repositories.travel_request_repository import TravelRequestRepository
 from app.services.travel_request_service import TravelRequestService
-
-
 from app.services.weather_service import WeatherService
 
 def get_travel_request_repository(
