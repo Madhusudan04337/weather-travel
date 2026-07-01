@@ -46,7 +46,7 @@ export function TravelRequestDetailsPage() {
         description="Detailed view of the travel request."
         action={
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => navigate(-1)}>
+            <Button variant="outline" onClick={() => navigate("/requests")}>
               Back
             </Button>
             <Button onClick={() => navigate(`/requests/${request.id}/edit`)}>
