@@ -1,5 +1,6 @@
 import type { TravelRequest } from "../../types/travel-request";
 import { TravelRequestCard } from "./TravelRequestCard";
+import { useNavigate } from "react-router-dom";
 import { useDeleteTravelRequest } from "../../hooks/useTravelRequests";
 import { toast } from "sonner";
 
@@ -9,6 +10,7 @@ interface TravelRequestListProps {
 
 export function TravelRequestList({ requests }: TravelRequestListProps) {
   const deleteMutation = useDeleteTravelRequest();
+  const navigate = useNavigate();
 
   const handleDelete = (id: string) => {
     if (window.confirm("Are you sure you want to delete this travel request?")) {
@@ -29,7 +31,7 @@ export function TravelRequestList({ requests }: TravelRequestListProps) {
         <TravelRequestCard
           key={request.id}
           request={request}
-          onView={(id) => console.log("View", id)}
+          onView={(id) => navigate(`/requests/${id}`)}
           onEdit={(id) => console.log("Edit", id)}
           onDelete={handleDelete}
         />
