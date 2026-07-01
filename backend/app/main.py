@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
-from app.core.database import connect_to_mongo, close_mongo_connection
+from app.core.database import connect_to_mongo, close_mongo_connection, ensure_indexes
 from app.api.v1.router import api_router
 from app.middleware.logging import LoggingMiddleware
 
@@ -23,6 +23,7 @@ async def lifespan(app: FastAPI):
     logger.info("Connecting to MongoDB …")
     await connect_to_mongo()
     logger.info("MongoDB connection established.")
+    await ensure_indexes()
     yield
     # ── Shutdown ─────────────────────────────────────────────────────────
     logger.info("Closing MongoDB connection …")
