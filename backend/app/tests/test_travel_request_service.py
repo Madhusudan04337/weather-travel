@@ -84,7 +84,9 @@ def mock_repo() -> MagicMock:
 
 @pytest.fixture
 def service(mock_repo: MagicMock) -> TravelRequestService:
-    return TravelRequestService(mock_repo)
+    mock_weather_service = MagicMock()
+    mock_recommendation_service = MagicMock()
+    return TravelRequestService(mock_repo, mock_weather_service, mock_recommendation_service)
 
 
 def _make_model(**overrides) -> TravelRequestModel:

@@ -22,9 +22,7 @@ class TripType(str, Enum):
 
     VACATION = "Vacation"
     BUSINESS = "Business"
-    MEDICAL = "Medical"
-    EDUCATION = "Education"
-    OTHER = "Other"
+    ADVENTURE = "Adventure"
 
 
 class BudgetRange(str, Enum):
