@@ -124,9 +124,4 @@ class TravelRequestModel(BaseModel):
     model_config = {
         # Allow population from MongoDB dicts that use native Python types.
         "populate_by_name": True,
-        # Serialise date/datetime as ISO 8601 strings in JSON output.
-        "json_encoders": {
-            date: lambda v: v.isoformat(),
-            datetime: lambda v: v.isoformat(),
-        },
     }
