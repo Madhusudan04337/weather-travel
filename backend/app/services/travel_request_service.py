@@ -84,6 +84,8 @@ class TravelRequestService:
         self._validate_travel_date(data.travel_date)
         self._validate_notes(data.special_needs, data.notes)
 
+        from app.services.weather_service import WeatherService
+        
         try:
             model = await self._repo.create(data)
         except RepositoryError as exc:
@@ -91,6 +93,28 @@ class TravelRequestService:
             raise ServiceError(
                 f"Could not create travel request: {exc.detail}"
             ) from exc
+
+        # ── Fetch and store weather data ──────────────────────────────────────
+        try:
+            weather_svc = WeatherService()
+            weather_summary = await weather_svc.get_weather_summary(
+                data.destination_city, data.travel_date
+            )
+            weather_data = weather_summary.model_dump()
+            
+            # Since the repository hardcodes "weather": None on create and doesn't
+            # expose weather in the update schema, we update the document directly.
+            oid = self._repo._to_object_id(model.id)
+            if oid:
+                await self._repo._col.update_one(
+                    {"_id": oid},
+                    {"$set": {"weather": weather_data}}
+                )
+                model.weather = weather_data
+                logger.info("Attached weather summary to travel request %s", model.id)
+        except Exception as exc:
+            # We don't want a weather failure to fail the whole creation
+            logger.warning("Failed to attach weather summary: %s", exc)
 
         logger.info("Travel request created: %s", model.id)
         return TravelRequestResponse.from_model(model)
