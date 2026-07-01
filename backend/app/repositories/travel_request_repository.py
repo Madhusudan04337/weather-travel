@@ -35,6 +35,7 @@ from app.core.exceptions import RepositoryError
 from app.models.travel_request import TravelRequestModel, TravelRequestStatus
 from app.schemas.travel_request import TravelRequestCreate, TravelRequestUpdate
 from app.schemas.weather import WeatherSummary
+from app.schemas.recommendation import Recommendation
 
 logger = logging.getLogger(__name__)
 
@@ -345,6 +346,47 @@ class TravelRequestRepository:
         except PyMongoError as exc:
             logger.exception("MongoDB error during update_weather(%s)", id)
             raise RepositoryError("update_weather", str(exc)) from exc
+
+    async def update_recommendation(self, id: str, recommendation: Recommendation) -> bool:
+        """
+        Update the recommendation field for a specific travel request document.
+
+        Parameters
+        ----------
+        id:
+            String ObjectId of the document to update.
+        recommendation:
+            The Recommendation schema object to embed in the document.
+
+        Returns
+        -------
+        bool
+            ``True`` if the document was updated, ``False`` if not found.
+
+        Raises
+        ------
+        RepositoryError
+            If the database operation fails.
+        """
+        oid = self._to_object_id(id)
+        if oid is None:
+            logger.debug("update_recommendation: '%s' is not a valid ObjectId", id)
+            return False
+
+        try:
+            result = await self._col.update_one(
+                {"_id": oid},
+                {"$set": {"recommendation": recommendation.model_dump()}}
+            )
+            updated = result.modified_count == 1
+            if updated:
+                logger.info("Updated recommendation for travel request %s", id)
+            else:
+                logger.debug("update_recommendation: document '%s' not found or unmodified", id)
+            return updated
+        except PyMongoError as exc:
+            logger.exception("MongoDB error during update_recommendation(%s)", id)
+            raise RepositoryError("update_recommendation", str(exc)) from exc
 
     async def delete(self, id: str) -> bool:
         """

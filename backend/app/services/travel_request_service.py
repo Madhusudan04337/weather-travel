@@ -39,6 +39,7 @@ logger = logging.getLogger(__name__)
 
 
 from app.services.weather_service import WeatherService
+from app.services.recommendation_service import RecommendationService
 
 class TravelRequestService:
     """
@@ -51,15 +52,19 @@ class TravelRequestService:
         dependency system.
     weather_service:
         A ``WeatherService`` instance injected by FastAPI.
+    recommendation_service:
+        A ``RecommendationService`` instance injected by FastAPI.
     """
 
     def __init__(
         self,
         repo: TravelRequestRepository,
         weather_service: WeatherService,
+        recommendation_service: RecommendationService,
     ) -> None:
         self._repo = repo
         self._weather_service = weather_service
+        self._recommendation_service = recommendation_service
 
     # ── Public methods ────────────────────────────────────────────────────────
 
@@ -111,6 +116,14 @@ class TravelRequestService:
             updated = await self._repo.update_weather(model.id, weather_summary)
             if updated:
                 model.weather = weather_summary.model_dump()
+                
+            # ── Generate and store recommendation ────────────────────────────────
+            recommendation = self._recommendation_service.generate_recommendation(weather_summary)
+            rec_updated = await self._repo.update_recommendation(model.id, recommendation)
+            if rec_updated:
+                model.recommendation = recommendation.model_dump()
+                logger.info("Attached recommendation to travel request %s", model.id)
+                
         except Exception as exc:
             # We don't want a weather failure to fail the whole creation
             logger.warning("Failed to attach weather summary: %s", exc)
