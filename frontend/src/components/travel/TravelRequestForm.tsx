@@ -93,7 +93,13 @@ export function TravelRequestForm() {
     },
     onError: (error: any) => {
       console.error(error);
-      const errorMsg = error?.response?.data?.detail || "Unable to create travel request.";
+      const detail = error?.response?.data?.detail;
+      let errorMsg = "Unable to create travel request.";
+      if (Array.isArray(detail)) {
+        errorMsg = detail.map((e: any) => e.msg).join(", ");
+      } else if (typeof detail === "string") {
+        errorMsg = detail;
+      }
       toast.error(errorMsg);
     },
   });

@@ -1,21 +1,21 @@
 export const TripType = {
-  VACATION: "vacation",
-  BUSINESS: "business",
-  ADVENTURE: "adventure",
+  VACATION: "Vacation",
+  BUSINESS: "Business",
+  ADVENTURE: "Adventure",
 } as const;
 export type TripType = typeof TripType[keyof typeof TripType];
 
 export const BudgetRange = {
-  LOW: "low",
-  MEDIUM: "medium",
-  HIGH: "high",
+  LOW: "Low",
+  MEDIUM: "Medium",
+  HIGH: "High",
 } as const;
 export type BudgetRange = typeof BudgetRange[keyof typeof BudgetRange];
 
 export const TravelRequestStatus = {
-  PENDING: "pending",
-  APPROVED: "approved",
-  REJECTED: "rejected",
+  PENDING: "Pending",
+  APPROVED: "Approved",
+  REJECTED: "Rejected",
 } as const;
 export type TravelRequestStatus = typeof TravelRequestStatus[keyof typeof TravelRequestStatus];
 
