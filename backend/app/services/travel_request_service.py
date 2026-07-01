@@ -20,6 +20,9 @@ import logging
 from datetime import date, timedelta
 from typing import Any
 
+import httpx
+from app.schemas.recommendation import Recommendation
+
 from app.core.exceptions import (
     BusinessRuleError,
     NotFoundError,
@@ -115,18 +118,37 @@ class TravelRequestService:
             # Delegate MongoDB update to the repository's public API
             updated = await self._repo.update_weather(model.id, weather_summary)
             if updated:
-                model.weather = weather_summary.model_dump()
+                model.weather = weather_summary.model_dump(mode="json")
                 
             # ── Generate and store recommendation ────────────────────────────────
             recommendation = self._recommendation_service.generate_recommendation(weather_summary)
             rec_updated = await self._repo.update_recommendation(model.id, recommendation)
             if rec_updated:
-                model.recommendation = recommendation.model_dump()
+                model.recommendation = recommendation.model_dump(mode="json")
                 logger.info("Attached recommendation to travel request %s", model.id)
                 
-        except Exception as exc:
+        except httpx.HTTPStatusError as exc:
+            if exc.response.status_code == 400:
+                # Forecast unavailable for selected date
+                logger.info("Weather forecast unavailable for date %s", data.travel_date)
+                
+                # Store null weather and a fallback recommendation
+                fallback_rec = Recommendation(
+                    suitable=False,
+                    title="Forecast Unavailable",
+                    message="Weather forecast is not available yet because the selected travel date is outside the forecast window. Please check again closer to your travel date.",
+                    risk_level="medium"
+                )
+                
+                # We can store weather=None (which is already the default)
+                # and update the recommendation manually:
+                await self._repo.update_recommendation(model.id, fallback_rec)
+                model.recommendation = fallback_rec.model_dump(mode="json")
+            else:
+                logger.exception("Weather integration failed with HTTP error")
+        except Exception:
             # We don't want a weather failure to fail the whole creation
-            logger.warning("Failed to attach weather summary: %s", exc)
+            logger.exception("Weather integration failed")
 
         logger.info("Travel request created: %s", model.id)
         return TravelRequestResponse.from_model(model)

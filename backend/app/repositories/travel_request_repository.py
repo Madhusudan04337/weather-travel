@@ -335,7 +335,7 @@ class TravelRequestRepository:
         try:
             result = await self._col.update_one(
                 {"_id": oid},
-                {"$set": {"weather": weather.model_dump()}}
+                {"$set": {"weather": weather.model_dump(mode="json")}}
             )
             updated = result.modified_count == 1
             if updated:
@@ -376,7 +376,7 @@ class TravelRequestRepository:
         try:
             result = await self._col.update_one(
                 {"_id": oid},
-                {"$set": {"recommendation": recommendation.model_dump()}}
+                {"$set": {"recommendation": recommendation.model_dump(mode="json")}}
             )
             updated = result.modified_count == 1
             if updated:
