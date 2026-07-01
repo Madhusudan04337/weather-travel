@@ -32,31 +32,50 @@ export function TravelRequestCard({
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-card-title font-bold text-text-primary">
-              {request.destination_city}
+            <h3 className="text-card-title font-bold text-text-primary flex items-center gap-1.5">
+              <span>📍</span> {request.destination_city}
             </h3>
-            <p className="text-small text-text-secondary mt-1">
-              {travelDate} • {request.trip_type}
-            </p>
+            <div className="text-small text-text-secondary mt-3">
+              <div>Travel Date:</div>
+              <div className="text-text-primary font-medium mt-0.5">{travelDate}</div>
+            </div>
           </div>
           <StatusBadge status={request.status} />
         </div>
         
         {/* Recommendation & Weather Section */}
         {request.weather && request.recommendation && (
-          <div className="mt-4 p-3 rounded-lg bg-background border border-border">
-            <div className="flex items-center justify-between mb-2">
-              <span className="font-semibold text-small text-text-primary">
+          <div className="mt-4 p-4 rounded-lg bg-background border border-border flex flex-col gap-3">
+            <div>
+              <div className="text-caption font-medium text-text-secondary flex items-center justify-between">
+                <span>☀️ Weather</span>
+                <RiskBadge riskLevel={request.recommendation.risk_level} />
+              </div>
+              <div className="text-small text-text-primary mt-1">
                 {request.weather.forecast.weather_description}
-              </span>
-              <RiskBadge riskLevel={request.recommendation.risk_level} />
+              </div>
             </div>
-            <p className="text-caption text-text-secondary">
-              {request.recommendation.message}
-            </p>
-            <div className="mt-2 text-caption text-text-muted flex gap-3">
-              <span>{request.weather.forecast.temperature_min}°C - {request.weather.forecast.temperature_max}°C</span>
-              <span>Precipitation: {request.weather.forecast.precipitation_probability}%</span>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <div className="text-caption font-medium text-text-secondary">🌡️ Temperature</div>
+                <div className="text-small text-text-primary mt-1">
+                  {request.weather.forecast.temperature_max}°C / {request.weather.forecast.temperature_min}°C
+                </div>
+              </div>
+              <div>
+                <div className="text-caption font-medium text-text-secondary">🌧 Rain Probability</div>
+                <div className="text-small text-text-primary mt-1">
+                  {request.weather.forecast.precipitation_probability}%
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div className="text-caption font-medium text-text-secondary">💡 Recommendation</div>
+              <div className="text-small text-text-primary mt-1">
+                {request.recommendation.message}
+              </div>
             </div>
           </div>
         )}
