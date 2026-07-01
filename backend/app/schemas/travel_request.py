@@ -191,6 +191,11 @@ class TravelRequestResponse(BaseModel):
     special_needs: bool
     notes: str | None
     status: TravelRequestStatus
+    weather: dict[str, Any] | None = None
+    recommendation: dict[str, Any] | None = None
+    approval: dict[str, Any] | None = None
+    tasks: list[dict[str, Any]] = []
+
     created_at: datetime
     updated_at: datetime
 
