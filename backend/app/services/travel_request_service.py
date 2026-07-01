@@ -313,6 +313,45 @@ class TravelRequestService:
             # Extremely unlikely (race condition after get_by_id), but handled.
             raise NotFoundError(f"Travel request '{id}' not found.")
 
+        # Step 5 — Refresh weather and recommendation if relevant fields changed
+        needs_weather_refresh = False
+        if "destination_city" in data.model_fields_set and data.destination_city != existing.destination_city:
+            needs_weather_refresh = True
+        if "travel_date" in data.model_fields_set and data.travel_date != existing.travel_date:
+            needs_weather_refresh = True
+
+        if needs_weather_refresh:
+            try:
+                weather_summary = await self._weather_service.get_weather_summary(
+                    updated.destination_city, updated.travel_date
+                )
+                
+                weather_updated = await self._repo.update_weather(updated.id, weather_summary)
+                if weather_updated:
+                    updated.weather = weather_summary.model_dump(mode="json")
+                    
+                recommendation = self._recommendation_service.generate_recommendation(weather_summary)
+                rec_updated = await self._repo.update_recommendation(updated.id, recommendation)
+                if rec_updated:
+                    updated.recommendation = recommendation.model_dump(mode="json")
+                    logger.info("Attached new recommendation to travel request %s", updated.id)
+                    
+            except httpx.HTTPStatusError as exc:
+                if exc.response.status_code == 400:
+                    logger.info("Weather forecast unavailable for date %s", updated.travel_date)
+                    fallback_rec = Recommendation(
+                        suitable=False,
+                        title="Forecast Unavailable",
+                        message="Weather forecast is not available yet because the selected travel date is outside the forecast window. Please check again closer to your travel date.",
+                        risk_level="medium"
+                    )
+                    await self._repo.update_recommendation(updated.id, fallback_rec)
+                    updated.recommendation = fallback_rec.model_dump(mode="json")
+                else:
+                    logger.exception("Weather integration failed with HTTP error during update")
+            except Exception:
+                logger.exception("Weather integration failed during update")
+
         logger.info("Travel request updated: %s", id)
         return TravelRequestResponse.from_model(updated)
 
