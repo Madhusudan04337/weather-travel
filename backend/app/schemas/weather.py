@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date as dt_date
 from pydantic import BaseModel, Field
 
 class WeatherLocation(BaseModel):
@@ -14,11 +14,12 @@ class WeatherForecast(BaseModel):
     """
     Represents the weather forecast for a specific date.
     """
-    date: date = Field(..., description="Date of the forecast.")
+    date: dt_date = Field(..., description="Date of the forecast.")
     temperature_max: float = Field(..., description="Maximum temperature in Celsius.")
     temperature_min: float = Field(..., description="Minimum temperature in Celsius.")
     precipitation_probability: int = Field(..., description="Probability of precipitation (percentage).")
     weather_code: int = Field(..., description="WMO Weather interpretation code.")
+    weather_description: str = Field(..., description="Human-readable description of the weather code.")
 
 class WeatherSummary(BaseModel):
     """
