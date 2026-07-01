@@ -47,13 +47,23 @@ const travelRequestSchema = z
 
 export type TravelRequestFormData = z.infer<typeof travelRequestSchema>;
 
-export function TravelRequestForm() {
+export interface TravelRequestFormProps {
+  mode?: "create" | "edit";
+  initialValues?: Partial<TravelRequestFormData> & { id?: string };
+  onSuccess?: () => void;
+}
+
+export function TravelRequestForm({
+  mode = "create",
+  initialValues,
+  onSuccess,
+}: TravelRequestFormProps = {}) {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   const methods = useForm<TravelRequestFormData>({
     resolver: zodResolver(travelRequestSchema),
-    defaultValues: {
+    defaultValues: initialValues || {
       destination_city: "",
       travel_date: "",
       special_needs: false,
@@ -84,17 +94,35 @@ export function TravelRequestForm() {
   }, [specialNeeds, trigger, hasDestination]);
 
   const mutation = useMutation({
-    mutationFn: travelRequestApi.createTravelRequest,
+    mutationFn: (data: TravelRequestFormData) => {
+      if (mode === "edit" && initialValues?.id) {
+        return travelRequestApi.updateTravelRequest(initialValues.id, data);
+      }
+      return travelRequestApi.createTravelRequest(data);
+    },
     onSuccess: () => {
-      toast.success("Travel request created successfully.");
+      toast.success(
+        mode === "edit"
+          ? "Travel request updated successfully."
+          : "Travel request created successfully."
+      );
       queryClient.invalidateQueries({ queryKey: ["travelRequests"] });
-      // Redirect or reset form. For now, navigate back to requests list
-      navigate("/requests");
+      if (mode === "edit" && initialValues?.id) {
+        queryClient.invalidateQueries({ queryKey: ["travelRequest", initialValues.id] });
+      }
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        navigate("/requests");
+      }
     },
     onError: (error: any) => {
       console.error(error);
       const detail = error?.response?.data?.detail;
-      let errorMsg = "Unable to create travel request.";
+      let errorMsg =
+        mode === "edit"
+          ? "Unable to update travel request."
+          : "Unable to create travel request.";
       if (Array.isArray(detail)) {
         errorMsg = detail.map((e: any) => e.msg).join(", ");
       } else if (typeof detail === "string") {
@@ -176,7 +204,7 @@ export function TravelRequestForm() {
             disabled={!hasDestination || mutation.isPending}
             isLoading={mutation.isPending}
           >
-            Create Request
+            {mode === "edit" ? "Save Changes" : "Create Request"}
           </Button>
         </div>
       </form>

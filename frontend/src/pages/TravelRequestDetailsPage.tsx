@@ -45,9 +45,14 @@ export function TravelRequestDetailsPage() {
         title={`Travel to ${request.destination_city}`}
         description="Detailed view of the travel request."
         action={
-          <Button variant="outline" onClick={() => navigate(-1)}>
-            Back to Dashboard
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => navigate(-1)}>
+              Back
+            </Button>
+            <Button onClick={() => navigate(`/requests/${request.id}/edit`)}>
+              Edit
+            </Button>
+          </div>
         }
       />
 

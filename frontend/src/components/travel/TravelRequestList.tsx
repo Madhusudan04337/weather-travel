@@ -32,7 +32,7 @@ export function TravelRequestList({ requests }: TravelRequestListProps) {
           key={request.id}
           request={request}
           onView={(id) => navigate(`/requests/${id}`)}
-          onEdit={(id) => console.log("Edit", id)}
+          onEdit={(id) => navigate(`/requests/${id}/edit`)}
           onDelete={handleDelete}
         />
       ))}

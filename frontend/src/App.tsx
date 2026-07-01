@@ -4,6 +4,7 @@ import { Toaster } from "sonner";
 import { MainLayout } from "./layouts/MainLayout";
 import { TravelRequestPage } from "./pages/TravelRequestPage";
 import { TravelRequestDetailsPage } from "./pages/TravelRequestDetailsPage";
+import { TravelRequestEditPage } from "./pages/TravelRequestEditPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -24,6 +25,7 @@ function App() {
             <Route path="/" element={<Navigate to="/requests" replace />} />
             <Route path="/requests" element={<TravelRequestPage />} />
             <Route path="/requests/:id" element={<TravelRequestDetailsPage />} />
+            <Route path="/requests/:id/edit" element={<TravelRequestEditPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
