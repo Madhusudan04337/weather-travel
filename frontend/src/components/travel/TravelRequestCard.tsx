@@ -1,4 +1,4 @@
-import { TravelRequest } from "../../types/travel-request";
+import type { TravelRequest } from "../../types/travel-request";
 import { Button } from "../ui/Button";
 import { StatusBadge } from "./StatusBadge";
 
