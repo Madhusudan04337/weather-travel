@@ -1,4 +1,4 @@
-import React, { HTMLAttributes } from "react";
+import type { HTMLAttributes } from "react";
 import { cn } from "../../utils/cn";
 
 export type BadgeVariant = "default" | "pending" | "approved" | "rejected" | "success" | "warning";
