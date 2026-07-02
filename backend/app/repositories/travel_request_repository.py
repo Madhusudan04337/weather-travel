@@ -32,7 +32,7 @@ from pymongo.errors import PyMongoError
 
 from app.core.constants import TRAVEL_REQUEST_COLLECTION
 from app.core.exceptions import RepositoryError
-from app.models.travel_request import TravelRequestModel, TravelRequestStatus
+from app.models.travel_request import TravelRequestModel, TravelRequestStatus, Approval
 from app.schemas.travel_request import TravelRequestCreate, TravelRequestUpdate
 from app.schemas.weather import WeatherSummary
 from app.schemas.recommendation import Recommendation
@@ -387,6 +387,47 @@ class TravelRequestRepository:
         except PyMongoError as exc:
             logger.exception("MongoDB error during update_recommendation(%s)", id)
             raise RepositoryError("update_recommendation", str(exc)) from exc
+
+    async def update_approval(self, id: str, approval: Approval) -> bool:
+        """
+        Update the approval field for a specific travel request document.
+
+        Parameters
+        ----------
+        id:
+            String ObjectId of the document to update.
+        approval:
+            The Approval schema object to embed in the document.
+
+        Returns
+        -------
+        bool
+            ``True`` if the document was updated, ``False`` if not found.
+
+        Raises
+        ------
+        RepositoryError
+            If the database operation fails.
+        """
+        oid = self._to_object_id(id)
+        if oid is None:
+            logger.debug("update_approval: '%s' is not a valid ObjectId", id)
+            return False
+
+        try:
+            result = await self._col.update_one(
+                {"_id": oid},
+                {"$set": {"approval": approval.model_dump(mode="json")}}
+            )
+            updated = result.modified_count == 1
+            if updated:
+                logger.info("Updated approval for travel request %s", id)
+            else:
+                logger.debug("update_approval: document '%s' not found or unmodified", id)
+            return updated
+        except PyMongoError as exc:
+            logger.exception("MongoDB error during update_approval(%s)", id)
+            raise RepositoryError("update_approval", str(exc)) from exc
 
     async def delete(self, id: str) -> bool:
         """

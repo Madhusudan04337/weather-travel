@@ -22,6 +22,7 @@ from typing import Any
 
 import httpx
 from app.schemas.recommendation import Recommendation
+from app.models.travel_request import Approval, ApprovalStatus
 
 from app.core.exceptions import (
     BusinessRuleError,
@@ -149,6 +150,27 @@ class TravelRequestService:
         except Exception:
             # We don't want a weather failure to fail the whole creation
             logger.exception("Weather integration failed")
+
+        # ── Set up Approval Workflow ──────────────────────────────────────────
+        if data.budget_range == "High":
+            approval = Approval(
+                required=True,
+                status=ApprovalStatus.PENDING,
+                approver="Manager"
+            )
+        else:
+            approval = Approval(
+                required=False,
+                status=ApprovalStatus.NOT_REQUIRED
+            )
+            
+        try:
+            approval_updated = await self._repo.update_approval(model.id, approval)
+            if approval_updated:
+                model.approval = approval.model_dump(mode="json")
+                logger.info("Attached approval workflow to travel request %s", model.id)
+        except Exception:
+            logger.exception("Failed to attach approval workflow")
 
         logger.info("Travel request created: %s", model.id)
         return TravelRequestResponse.from_model(model)
