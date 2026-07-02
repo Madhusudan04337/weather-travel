@@ -38,14 +38,17 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref
   ) => {
+    const isButton2 = variant === "primary";
     return (
       <button
         ref={ref}
         disabled={disabled || isLoading}
         className={cn(
-          "inline-flex items-center justify-center font-medium focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none btn-transition border",
-          variantStyles[variant],
-          sizeStyles[size],
+          isButton2
+            ? "button2 disabled:opacity-50 disabled:pointer-events-none"
+            : "inline-flex items-center justify-center font-medium focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none btn-transition border",
+          !isButton2 && variantStyles[variant],
+          !isButton2 && sizeStyles[size],
           className
         )}
         {...props}
