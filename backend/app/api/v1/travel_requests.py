@@ -75,6 +75,33 @@ async def update_travel_request(
     return await service.update(id, data)
 
 
+@router.patch(
+    "/{id}/approve",
+    response_model=TravelRequestResponse,
+    summary="Approve a travel request",
+)
+async def approve_travel_request(
+    id: str,
+    service: TravelRequestService = Depends(get_travel_request_service),
+) -> TravelRequestResponse:
+    return await service.approve_request(id)
+
+from pydantic import BaseModel
+class RejectPayload(BaseModel):
+    remarks: str | None = None
+
+@router.patch(
+    "/{id}/reject",
+    response_model=TravelRequestResponse,
+    summary="Reject a travel request",
+)
+async def reject_travel_request(
+    id: str,
+    payload: RejectPayload,
+    service: TravelRequestService = Depends(get_travel_request_service),
+) -> TravelRequestResponse:
+    return await service.reject_request(id, remarks=payload.remarks)
+
 @router.delete(
     "/{id}",
     status_code=status.HTTP_204_NO_CONTENT,

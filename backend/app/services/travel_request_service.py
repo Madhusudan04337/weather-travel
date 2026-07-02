@@ -17,12 +17,12 @@ Explicitly NOT responsible for
 from __future__ import annotations
 
 import logging
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime, timezone
 from typing import Any
 
 import httpx
 from app.schemas.recommendation import Recommendation
-from app.models.travel_request import Approval, ApprovalStatus
+from app.models.travel_request import Approval, ApprovalStatus, TravelRequestStatus
 
 from app.core.exceptions import (
     BusinessRuleError,
@@ -167,7 +167,7 @@ class TravelRequestService:
         try:
             approval_updated = await self._repo.update_approval(model.id, approval)
             if approval_updated:
-                model.approval = approval.model_dump(mode="json")
+                model.approval = approval
                 logger.info("Attached approval workflow to travel request %s", model.id)
         except Exception:
             logger.exception("Failed to attach approval workflow")
@@ -207,6 +207,67 @@ class TravelRequestService:
             raise NotFoundError(f"Travel request '{id}' not found.")
 
         return TravelRequestResponse.from_model(model)
+
+    async def approve_request(self, id: str) -> TravelRequestResponse:
+        """Approve a pending travel request."""
+        try:
+            existing = await self._repo.get_by_id(id)
+        except RepositoryError as exc:
+            raise ServiceError(f"Could not retrieve travel request: {exc.detail}") from exc
+            
+        if not existing:
+            raise NotFoundError(f"Travel request '{id}' not found.")
+            
+        if not existing.approval or existing.approval.status != ApprovalStatus.PENDING:
+            raise BusinessRuleError("Only pending requests can be approved.")
+            
+        # Update Approval object
+        existing.approval.status = ApprovalStatus.APPROVED
+        existing.approval.approved_at = datetime.now(tz=timezone.utc)
+        
+        try:
+            await self._repo.update_approval(id, existing.approval)
+            # Update TravelRequestStatus
+            updated = await self._repo.update(id, TravelRequestUpdate(status=TravelRequestStatus.APPROVED))
+        except RepositoryError as exc:
+            raise ServiceError(f"Could not update travel request: {exc.detail}") from exc
+            
+        if not updated:
+            raise NotFoundError(f"Travel request '{id}' not found.")
+            
+        logger.info("Travel request approved: %s", id)
+        return TravelRequestResponse.from_model(updated)
+
+    async def reject_request(self, id: str, remarks: str | None = None) -> TravelRequestResponse:
+        """Reject a pending travel request."""
+        try:
+            existing = await self._repo.get_by_id(id)
+        except RepositoryError as exc:
+            raise ServiceError(f"Could not retrieve travel request: {exc.detail}") from exc
+            
+        if not existing:
+            raise NotFoundError(f"Travel request '{id}' not found.")
+            
+        if not existing.approval or existing.approval.status != ApprovalStatus.PENDING:
+            raise BusinessRuleError("Only pending requests can be rejected.")
+            
+        # Update Approval object
+        existing.approval.status = ApprovalStatus.REJECTED
+        existing.approval.rejected_at = datetime.now(tz=timezone.utc)
+        existing.approval.remarks = remarks
+        
+        try:
+            await self._repo.update_approval(id, existing.approval)
+            # Update TravelRequestStatus to CLOSED
+            updated = await self._repo.update(id, TravelRequestUpdate(status=TravelRequestStatus.CLOSED))
+        except RepositoryError as exc:
+            raise ServiceError(f"Could not update travel request: {exc.detail}") from exc
+            
+        if not updated:
+            raise NotFoundError(f"Travel request '{id}' not found.")
+            
+        logger.info("Travel request rejected: %s", id)
+        return TravelRequestResponse.from_model(updated)
 
     async def list(
         self,

@@ -39,6 +39,7 @@ class TravelRequestStatus(str, Enum):
     PENDING = "Pending"
     APPROVED = "Approved"
     REJECTED = "Rejected"
+    CLOSED = "Closed"
 
 class ApprovalStatus(str, Enum):
     """Approval workflow status."""
