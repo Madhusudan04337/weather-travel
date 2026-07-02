@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { PageHeader } from "../components/layout/PageHeader";
 import { Card, CardContent } from "../components/ui/Card";
 import { ErrorState } from "../components/ui/ErrorState";
@@ -12,7 +12,16 @@ import { Button } from "../components/ui/Button";
 
 export function TravelRequestPage() {
   const { data, isLoading, isError, refetch } = useTravelRequests();
-  const [showForm, setShowForm] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  const showForm = searchParams.get("new") === "true";
+  const setShowForm = (show: boolean) => {
+    if (show) {
+      setSearchParams({ new: "true" });
+    } else {
+      setSearchParams({});
+    }
+  };
 
   const requests = data?.data || [];
   
@@ -76,7 +85,7 @@ export function TravelRequestPage() {
                 Cancel
               </Button>
             </div>
-            <TravelRequestForm />
+            <TravelRequestForm onSuccess={() => setShowForm(false)} />
           </CardContent>
         </Card>
       )}
