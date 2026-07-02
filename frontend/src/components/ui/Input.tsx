@@ -12,31 +12,29 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     const inputId = id || (label ? `input-${label.replace(/\s+/g, '-').toLowerCase()}` : undefined);
 
     return (
-      <div className="w-full flex flex-col gap-1.5">
-        {label && (
-          <label
-            htmlFor={inputId}
+      <div className="w-full flex flex-col">
+        <div className="inputGroup">
+          <input
+            id={inputId}
+            ref={ref}
+            disabled={disabled}
             className={cn(
-              "text-body-sm font-medium text-text-primary",
-              disabled && "opacity-50"
+              "disabled:cursor-not-allowed disabled:opacity-50",
+              error && "border-error focus:ring-error focus:border-error",
+              className
             )}
-          >
-            {label}
-          </label>
-        )}
-        <input
-          id={inputId}
-          ref={ref}
-          disabled={disabled}
-          className={cn(
-            "flex w-full rounded-input border border-border bg-surface px-3 py-2 text-body text-text-primary placeholder:text-text-muted input-focus",
-            "disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-background",
-            error && "border-error focus:ring-error focus:border-error",
-            className
+            {...props}
+          />
+          {label && (
+            <label
+              htmlFor={inputId}
+              className={cn(disabled && "opacity-50")}
+            >
+              {label}
+            </label>
           )}
-          {...props}
-        />
-        {error && <span className="text-caption text-error">{error}</span>}
+        </div>
+        {error && <span className="text-caption text-error mt-1">{error}</span>}
       </div>
     );
   }
