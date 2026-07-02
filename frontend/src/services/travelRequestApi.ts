@@ -32,4 +32,14 @@ export const travelRequestApi = {
   deleteTravelRequest: async (id: string): Promise<void> => {
     await apiClient.delete(`/requests/${id}`);
   },
+
+  approveTravelRequest: async (id: string): Promise<TravelRequest> => {
+    const response = await apiClient.patch<TravelRequest>(`/requests/${id}/approve`);
+    return response.data;
+  },
+
+  rejectTravelRequest: async (id: string, remarks?: string): Promise<TravelRequest> => {
+    const response = await apiClient.patch<TravelRequest>(`/requests/${id}/reject`, { remarks });
+    return response.data;
+  },
 };

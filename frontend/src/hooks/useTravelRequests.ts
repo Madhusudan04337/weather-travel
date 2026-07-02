@@ -17,3 +17,26 @@ export function useDeleteTravelRequest() {
     },
   });
 }
+
+export function useApproveTravelRequest() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => travelRequestApi.approveTravelRequest(id),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["travelRequests"] });
+      queryClient.invalidateQueries({ queryKey: ["travelRequest", data.id] });
+    },
+  });
+}
+
+export function useRejectTravelRequest() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, remarks }: { id: string; remarks?: string }) =>
+      travelRequestApi.rejectTravelRequest(id, remarks),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["travelRequests"] });
+      queryClient.invalidateQueries({ queryKey: ["travelRequest", data.id] });
+    },
+  });
+}

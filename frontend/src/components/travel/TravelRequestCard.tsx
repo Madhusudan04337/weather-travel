@@ -7,6 +7,8 @@ interface TravelRequestCardProps {
   onView?: (id: string) => void;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
+  onApprove?: (id: string) => void;
+  onReject?: (id: string) => void;
 }
 
 export function TravelRequestCard({
@@ -14,6 +16,8 @@ export function TravelRequestCard({
   onView,
   onEdit,
   onDelete,
+  onApprove,
+  onReject,
 }: TravelRequestCardProps) {
   // Format dates
   const travelDate = new Date(request.travel_date).toLocaleDateString(undefined, {
@@ -91,6 +95,26 @@ export function TravelRequestCard({
         </div>
 
         <div className="flex items-center gap-2 pt-2 md:pt-0">
+          {onApprove && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onApprove(request.id)}
+              className="text-success border-success/30 hover:bg-success/10 hover:text-success hover:border-success"
+            >
+              Approve
+            </Button>
+          )}
+          {onReject && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onReject(request.id)}
+              className="text-error border-error/30 hover:bg-error/10 hover:text-error hover:border-error"
+            >
+              Reject
+            </Button>
+          )}
           {onView && (
             <Button
               variant="ghost"

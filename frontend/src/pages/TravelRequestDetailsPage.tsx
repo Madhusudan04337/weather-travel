@@ -166,6 +166,54 @@ export function TravelRequestDetailsPage() {
               </CardContent>
             </Card>
           )}
+
+          {request.approval && (
+            <Card>
+              <CardHeader>
+                <h3 className="text-heading-s font-semibold">🛡️ Approval Workflow</h3>
+              </CardHeader>
+              <CardContent className="flex flex-col gap-3">
+                <div>
+                  <div className="text-caption font-medium text-text-secondary">Status</div>
+                  <div className="text-body font-semibold mt-1">
+                    {request.approval.status}
+                  </div>
+                </div>
+                {request.approval.approver && (
+                  <div>
+                    <div className="text-caption font-medium text-text-secondary">Approver</div>
+                    <div className="text-small text-text-primary mt-1">
+                      {request.approval.approver}
+                    </div>
+                  </div>
+                )}
+                {request.approval.approved_at && (
+                  <div>
+                    <div className="text-caption font-medium text-text-secondary">Approved At</div>
+                    <div className="text-small text-text-primary mt-1">
+                      {new Date(request.approval.approved_at).toLocaleString()}
+                    </div>
+                  </div>
+                )}
+                {request.approval.rejected_at && (
+                  <div>
+                    <div className="text-caption font-medium text-text-secondary">Rejected At</div>
+                    <div className="text-small text-text-primary mt-1">
+                      {new Date(request.approval.rejected_at).toLocaleString()}
+                    </div>
+                  </div>
+                )}
+                {request.approval.remarks && (
+                  <div>
+                    <div className="text-caption font-medium text-text-secondary">Remarks</div>
+                    <div className="text-small text-text-primary mt-1 italic">
+                      "{request.approval.remarks}"
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>
