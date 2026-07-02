@@ -11,14 +11,31 @@ class RecommendationService:
         Evaluate weather conditions and return a deterministic recommendation.
         """
         code = weather.forecast.weather_code
+        temp = weather.forecast.temperature_max
+        rain = weather.forecast.precipitation_probability
         
-        # Heavy Rain or Thunderstorms
-        if code in [65, 67, 75, 82, 86, 95, 96, 99]:
+        # Thunderstorms
+        if code in [95, 96, 99]:
             return Recommendation(
                 suitable=False,
-                title="Not Recommended",
-                message="Consider postponing the trip due to heavy rain or thunderstorms.",
+                title="Severe Weather",
+                message=(
+                    f"Thunderstorms are expected with a {rain}% chance of rain. "
+                    "Outdoor activities are not recommended. Consider postponing your trip."
+                ),
                 risk_level="high",
+            )
+            
+        # Extreme Heat
+        if temp >= 38:
+            return Recommendation(
+                suitable=True,
+                title="Extreme Heat",
+                message=(
+                    "Very hot weather is expected. Stay hydrated, wear light clothing, "
+                    "avoid outdoor activities during the afternoon, and carry water."
+                ),
+                risk_level="medium",
             )
             
         # Snow conditions
@@ -35,7 +52,10 @@ class RecommendationService:
             return Recommendation(
                 suitable=True,
                 title="Rainy Conditions",
-                message="Carry an umbrella.",
+                message=(
+                    f"There is a {rain}% chance of rain. "
+                    "Carry an umbrella and plan indoor activities if needed."
+                ),
                 risk_level="medium",
             )
             
@@ -52,6 +72,9 @@ class RecommendationService:
         return Recommendation(
             suitable=True,
             title="Great Weather",
-            message="Great weather for travel.",
+            message=(
+                f"Pleasant weather with a maximum temperature of {temp}°C. "
+                "Great conditions for sightseeing and outdoor activities."
+            ),
             risk_level="low",
         )
