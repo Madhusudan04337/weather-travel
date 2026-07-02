@@ -40,6 +40,26 @@ class TravelRequestStatus(str, Enum):
     APPROVED = "Approved"
     REJECTED = "Rejected"
 
+class ApprovalStatus(str, Enum):
+    """Approval workflow status."""
+
+    NOT_REQUIRED = "Not Required"
+    PENDING = "Pending"
+    APPROVED = "Approved"
+    REJECTED = "Rejected"
+
+class Approval(BaseModel):
+    """
+    Approval workflow information.
+    """
+
+    required: bool
+    status: ApprovalStatus
+    approver: str | None = None
+    approved_at: datetime | None = None
+    rejected_at: datetime | None = None
+    remarks: str | None = None
+    
 
 # ── Domain model ──────────────────────────────────────────────────────────────
 
@@ -100,9 +120,9 @@ class TravelRequestModel(BaseModel):
         default=None,
         description="[Phase 4] AI recommendation output.",
     )
-    approval: dict[str, Any] | None = Field(
+    approval: Approval | None = Field(
         default=None,
-        description="[Phase 5] Approval workflow metadata.",
+        description="[Phase 5] Approval workflow information.",
     )
     tasks: list[dict[str, Any]] = Field(
         default_factory=list,
