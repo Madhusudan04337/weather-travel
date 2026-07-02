@@ -16,8 +16,26 @@ export const TravelRequestStatus = {
   PENDING: "Pending",
   APPROVED: "Approved",
   REJECTED: "Rejected",
+  CLOSED: "Closed",
 } as const;
 export type TravelRequestStatus = typeof TravelRequestStatus[keyof typeof TravelRequestStatus];
+
+export const ApprovalStatus = {
+  NOT_REQUIRED: "Not Required",
+  PENDING: "Pending",
+  APPROVED: "Approved",
+  REJECTED: "Rejected",
+} as const;
+export type ApprovalStatus = typeof ApprovalStatus[keyof typeof ApprovalStatus];
+
+export interface Approval {
+  required: boolean;
+  status: ApprovalStatus;
+  approver?: string | null;
+  approved_at?: string | null;
+  rejected_at?: string | null;
+  remarks?: string | null;
+}
 
 export interface WeatherLocation {
   name: string;
@@ -51,13 +69,14 @@ export interface TravelRequest {
   id: string;
   destination_city: string;
   travel_date: string;
-  trip_type: (typeof TripType)[keyof typeof TripType];
-  budget_range: (typeof BudgetRange)[keyof typeof BudgetRange];
+  trip_type: TripType;
+  budget_range: BudgetRange;
   special_needs: boolean;
   notes: string | null;
-  status: (typeof TravelRequestStatus)[keyof typeof TravelRequestStatus];
+  status: TravelRequestStatus;
   weather?: WeatherSummary | null;
   recommendation?: Recommendation | null;
+  approval?: Approval | null;
   created_at: string;
   updated_at: string;
 }

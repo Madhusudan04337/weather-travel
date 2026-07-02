@@ -19,7 +19,18 @@ export function Navbar() {
                 )
               }
             >
-              Travel Requests
+              Dashboard
+            </NavLink>
+            <NavLink
+              to="/approval"
+              className={({ isActive }) =>
+                cn(
+                  "text-body-sm font-medium transition-colors hover:text-brand",
+                  isActive ? "text-brand" : "text-text-secondary"
+                )
+              }
+            >
+              Approval Queue
             </NavLink>
           </nav>
         </div>

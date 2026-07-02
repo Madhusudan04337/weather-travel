@@ -11,12 +11,14 @@ export function StatusBadge({ status }: StatusBadgeProps) {
     [TravelRequestStatus.PENDING]: "pending",
     [TravelRequestStatus.APPROVED]: "approved",
     [TravelRequestStatus.REJECTED]: "rejected",
+    [TravelRequestStatus.CLOSED]: "rejected",
   };
 
   const labels: Record<TravelRequestStatus, string> = {
     [TravelRequestStatus.PENDING]: "Pending",
     [TravelRequestStatus.APPROVED]: "Approved",
     [TravelRequestStatus.REJECTED]: "Rejected",
+    [TravelRequestStatus.CLOSED]: "Closed",
   };
 
   return (

@@ -91,27 +91,33 @@ export function TravelRequestCard({
         </div>
 
         <div className="flex items-center gap-2 pt-2 md:pt-0">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onView?.(request.id)}
-          >
-            View
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onEdit?.(request.id)}
-          >
-            Edit
-          </Button>
-          <Button
-            variant="danger"
-            size="sm"
-            onClick={() => onDelete?.(request.id)}
-          >
-            Delete
-          </Button>
+          {onView && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onView(request.id)}
+            >
+              View
+            </Button>
+          )}
+          {onEdit && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onEdit(request.id)}
+            >
+              Edit
+            </Button>
+          )}
+          {onDelete && (
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={() => onDelete(request.id)}
+            >
+              Delete
+            </Button>
+          )}
         </div>
       </div>
     </div>
