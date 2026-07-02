@@ -122,7 +122,7 @@ class TravelRequestService:
                 model.weather = weather_summary.model_dump(mode="json")
                 
             # ── Generate and store recommendation ────────────────────────────────
-            recommendation = self._recommendation_service.generate_recommendation(weather_summary)
+            recommendation = self._recommendation_service.generate_recommendation(weather_summary, data.trip_type)
             rec_updated = await self._repo.update_recommendation(model.id, recommendation)
             if rec_updated:
                 model.recommendation = recommendation.model_dump(mode="json")
@@ -413,7 +413,7 @@ class TravelRequestService:
                 if weather_updated:
                     updated.weather = weather_summary.model_dump(mode="json")
                     
-                recommendation = self._recommendation_service.generate_recommendation(weather_summary)
+                recommendation = self._recommendation_service.generate_recommendation(weather_summary, updated.trip_type)
                 rec_updated = await self._repo.update_recommendation(updated.id, recommendation)
                 if rec_updated:
                     updated.recommendation = recommendation.model_dump(mode="json")
