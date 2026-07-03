@@ -6,6 +6,8 @@ import { LoadingSkeleton } from "../components/travel/LoadingSkeleton";
 import { ErrorState } from "../components/ui/ErrorState";
 import { useTravelRequest } from "../hooks/useTravelRequest";
 import { StatusBadge } from "../components/travel/StatusBadge";
+import { FulfillmentTasksCard } from "../components/travel/FulfillmentTasksCard";
+import { cn } from "../utils/cn";
 
 export function TravelRequestDetailsPage() {
   const { id } = useParams<{ id: string }>();
@@ -46,7 +48,7 @@ export function TravelRequestDetailsPage() {
         description="Detailed view of the travel request."
         action={
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => navigate("/requests")}>
+            <Button variant="outline" onClick={() => navigate(-1)}>
               Back
             </Button>
             <Button onClick={() => navigate(`/requests/${request.id}/edit`)}>
@@ -66,7 +68,7 @@ export function TravelRequestDetailsPage() {
             </div>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <div className="text-caption font-medium text-text-secondary">Destination</div>
                 <div className="text-body text-text-primary mt-1">{request.destination_city}</div>
@@ -77,11 +79,11 @@ export function TravelRequestDetailsPage() {
               </div>
               <div>
                 <div className="text-caption font-medium text-text-secondary">Trip Type</div>
-                <div className="text-body text-text-primary mt-1 capitalize">{request.trip_type}</div>
+                <div className="text-body text-text-primary mt-1 capitalize break-words">{request.trip_type}</div>
               </div>
               <div>
                 <div className="text-caption font-medium text-text-secondary">Budget Range</div>
-                <div className="text-body text-text-primary mt-1 capitalize">{request.budget_range}</div>
+                <div className="text-body text-text-primary mt-1 capitalize break-words">{request.budget_range}</div>
               </div>
             </div>
 
@@ -101,7 +103,7 @@ export function TravelRequestDetailsPage() {
               </div>
             )}
             
-            <div className="mt-4 pt-4 border-t border-border grid grid-cols-2 gap-4">
+            <div className="mt-4 pt-4 border-t border-border grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <div className="text-caption font-medium text-text-secondary">Created At</div>
                 <div className="text-small text-text-muted mt-1">{createdAt}</div>
@@ -125,7 +127,7 @@ export function TravelRequestDetailsPage() {
                 <div className="text-body font-medium text-text-primary">
                   {request.weather.forecast.weather_description}
                 </div>
-                <div className="grid grid-cols-2 gap-4 mt-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
                   <div>
                     <div className="text-caption font-medium text-text-secondary">🌡️ Temp</div>
                     <div className="text-small text-text-primary mt-1">
@@ -175,7 +177,13 @@ export function TravelRequestDetailsPage() {
               <CardContent className="flex flex-col gap-3">
                 <div>
                   <div className="text-caption font-medium text-text-secondary">Status</div>
-                  <div className="text-body font-semibold mt-1">
+                  <div className={cn(
+                    "inline-flex px-2.5 py-1 rounded-full text-caption font-semibold border mt-1",
+                    request.approval.status === 'Approved' ? "bg-success/10 text-success border-success/20" :
+                    request.approval.status === 'Rejected' ? "bg-error/10 text-error border-error/20" :
+                    request.approval.status === 'Pending' ? "bg-accent/10 text-accent border-accent/20" :
+                    "bg-text-muted/10 text-text-muted border-text-muted/20"
+                  )}>
                     {request.approval.status}
                   </div>
                 </div>
@@ -207,12 +215,16 @@ export function TravelRequestDetailsPage() {
                   <div>
                     <div className="text-caption font-medium text-text-secondary">Remarks</div>
                     <div className="text-small text-text-primary mt-1 italic">
-                      "{request.approval.remarks}"
+                      {request.approval.remarks}
                     </div>
                   </div>
                 )}
               </CardContent>
             </Card>
+          )}
+
+          {(request.status === "Approved" || request.status === "Closed") && (
+            <FulfillmentTasksCard request={request} />
           )}
         </div>
       </div>
