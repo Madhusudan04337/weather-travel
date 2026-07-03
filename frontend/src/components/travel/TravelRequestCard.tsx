@@ -102,12 +102,12 @@ export function TravelRequestCard({
             View
           </Button>
         )}
-        {onEdit && (
+        {onEdit && request.status === "Pending" && (
           <Button variant="outline" size="sm" onClick={() => onEdit(request.id)}>
             Edit
           </Button>
         )}
-        {onDelete && (
+        {onDelete && request.status === "Pending" && (
           <Button variant="danger" size="sm" onClick={() => onDelete(request.id)}>
             Delete
           </Button>

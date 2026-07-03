@@ -102,6 +102,31 @@ class TravelRequestService:
         self._validate_travel_date(data.travel_date)
         self._validate_notes(data.special_needs, data.notes)
 
+        from app.clients.open_meteo_client import CityNotFoundError
+
+        # ── Pre-validate the city and fetch weather ───────────────────────────
+        try:
+            weather_summary = await self._weather_service.get_weather_summary(
+                data.destination_city, data.travel_date
+            )
+            forecast_unavailable = False
+        except CityNotFoundError:
+            raise BusinessRuleError("Destination city not found. Please enter a valid destination city.")
+        except httpx.HTTPStatusError as exc:
+            if exc.response.status_code == 400:
+                logger.info("Weather forecast unavailable for date %s", data.travel_date)
+                weather_summary = None
+                forecast_unavailable = True
+            else:
+                logger.exception("Weather integration failed with HTTP error")
+                weather_summary = None
+                forecast_unavailable = False
+        except Exception:
+            logger.exception("Weather integration failed")
+            weather_summary = None
+            forecast_unavailable = False
+
+        # ── Create the request document ───────────────────────────────────────
         try:
             model = await self._repo.create(data)
         except RepositoryError as exc:
@@ -110,46 +135,27 @@ class TravelRequestService:
                 f"Could not create travel request: {exc.detail}"
             ) from exc
 
-        # ── Fetch and store weather data ──────────────────────────────────────
-        try:
-            weather_summary = await self._weather_service.get_weather_summary(
-                data.destination_city, data.travel_date
-            )
-            
-            # Delegate MongoDB update to the repository's public API
+        # ── Store pre-fetched weather data ────────────────────────────────────
+        if weather_summary:
             updated = await self._repo.update_weather(model.id, weather_summary)
             if updated:
                 model.weather = weather_summary.model_dump(mode="json")
                 
-            # ── Generate and store recommendation ────────────────────────────────
             recommendation = self._recommendation_service.generate_recommendation(weather_summary, data.trip_type)
             rec_updated = await self._repo.update_recommendation(model.id, recommendation)
             if rec_updated:
                 model.recommendation = recommendation.model_dump(mode="json")
                 logger.info("Attached recommendation to travel request %s", model.id)
                 
-        except httpx.HTTPStatusError as exc:
-            if exc.response.status_code == 400:
-                # Forecast unavailable for selected date
-                logger.info("Weather forecast unavailable for date %s", data.travel_date)
-                
-                # Store null weather and a fallback recommendation
-                fallback_rec = Recommendation(
-                    suitable=False,
-                    title="Forecast Unavailable",
-                    message="Weather forecast is not available yet because the selected travel date is outside the forecast window. Please check again closer to your travel date.",
-                    risk_level="medium"
-                )
-                
-                # We can store weather=None (which is already the default)
-                # and update the recommendation manually:
-                await self._repo.update_recommendation(model.id, fallback_rec)
-                model.recommendation = fallback_rec.model_dump(mode="json")
-            else:
-                logger.exception("Weather integration failed with HTTP error")
-        except Exception:
-            # We don't want a weather failure to fail the whole creation
-            logger.exception("Weather integration failed")
+        elif forecast_unavailable:
+            fallback_rec = Recommendation(
+                suitable=False,
+                title="Forecast Unavailable",
+                message="Weather forecast is not available yet because the selected travel date is outside the forecast window. Please check again closer to your travel date.",
+                risk_level="medium"
+            )
+            await self._repo.update_recommendation(model.id, fallback_rec)
+            model.recommendation = fallback_rec.model_dump(mode="json")
 
         # ── Set up Approval Workflow ──────────────────────────────────────────
         if data.budget_range == "High":
@@ -171,6 +177,35 @@ class TravelRequestService:
                 logger.info("Attached approval workflow to travel request %s", model.id)
         except Exception:
             logger.exception("Failed to attach approval workflow")
+
+        # ── Handle Fulfillment Tasks (Low/Medium budget) ───────────────────────
+        if data.budget_range != "High":
+            tasks = [
+                FulfillmentTask(
+                    id="check_weather",
+                    title="Check Weather Conditions",
+                    description="Verify the latest weather forecast for the destination and travel date.",
+                ),
+                FulfillmentTask(
+                    id="generate_recommendation",
+                    title="Generate Travel Recommendation",
+                    description="Analyse weather data and generate a personalised travel recommendation.",
+                ),
+                FulfillmentTask(
+                    id="share_recommendation",
+                    title="Share Recommendation with Requester",
+                    description="Send the travel recommendation and weather report to the requester via email.",
+                ),
+            ]
+            try:
+                await self._repo.update_tasks(model.id, tasks)
+                model.tasks = [t.model_dump(mode="json") for t in tasks]
+                
+                # Advance status to APPROVED immediately since no approval is needed
+                await self._repo.update(model.id, TravelRequestUpdate(status=TravelRequestStatus.APPROVED))
+                model.status = TravelRequestStatus.APPROVED
+            except Exception:
+                logger.exception("Failed to create initial fulfillment tasks")
 
         logger.info("Travel request created: %s", model.id)
         return TravelRequestResponse.from_model(model)
@@ -235,6 +270,32 @@ class TravelRequestService:
         if not updated:
             raise NotFoundError(f"Travel request '{id}' not found.")
             
+        # ── Auto-create fulfillment tasks upon approval ───────────────────────
+        if not updated.tasks:
+            tasks = [
+                FulfillmentTask(
+                    id="check_weather",
+                    title="Check Weather Conditions",
+                    description="Verify the latest weather forecast for the destination and travel date.",
+                ),
+                FulfillmentTask(
+                    id="generate_recommendation",
+                    title="Generate Travel Recommendation",
+                    description="Analyse weather data and generate a personalised travel recommendation.",
+                ),
+                FulfillmentTask(
+                    id="share_recommendation",
+                    title="Share Recommendation with Requester",
+                    description="Send the travel recommendation and weather report to the requester via email.",
+                ),
+            ]
+            try:
+                await self._repo.update_tasks(id, tasks)
+                # reload to get the tasks
+                updated = await self._repo.get_by_id(id)
+            except Exception:
+                logger.exception("Failed to auto-create fulfillment tasks on approval")
+
         logger.info("Travel request approved: %s", id)
         return TravelRequestResponse.from_model(updated)
 
@@ -472,6 +533,9 @@ class TravelRequestService:
         if existing is None:
             raise NotFoundError(f"Travel request '{id}' not found.")
 
+        if existing.status != TravelRequestStatus.PENDING:
+            raise BusinessRuleError("Only pending requests can be updated.")
+
         # Step 2 — Merge existing values with the explicitly-set PATCH fields.
         merged: dict[str, Any] = existing.model_dump()
         for field in data.model_fields_set:
@@ -553,6 +617,18 @@ class TravelRequestService:
         ServiceError
             If the repository fails for an infrastructure reason.
         """
+        try:
+            existing = await self._repo.get_by_id(id)
+        except RepositoryError as exc:
+            logger.error("Repository failure loading document for delete(%s): %s", id, exc.detail)
+            raise ServiceError(f"Could not retrieve travel request: {exc.detail}") from exc
+
+        if not existing:
+            raise NotFoundError(f"Travel request '{id}' not found.")
+
+        if existing.status != TravelRequestStatus.PENDING:
+            raise BusinessRuleError("Only pending requests can be deleted.")
+
         try:
             deleted = await self._repo.delete(id)
         except RepositoryError as exc:

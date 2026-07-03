@@ -51,9 +51,11 @@ export function TravelRequestDetailsPage() {
             <Button variant="outline" onClick={() => navigate(-1)}>
               Back
             </Button>
-            <Button onClick={() => navigate(`/requests/${request.id}/edit`)}>
-              Edit
-            </Button>
+            {request.status === "Pending" && (
+              <Button onClick={() => navigate(`/requests/${request.id}/edit`)}>
+                Edit
+              </Button>
+            )}
           </div>
         }
       />

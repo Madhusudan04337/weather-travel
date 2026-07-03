@@ -15,7 +15,7 @@ export function Navbar({ isPanelOpen: _isPanelOpen, onTogglePanel }: NavbarProps
   const location = useLocation();
   const navigate = useNavigate();
 
-  const isDashboardActive = location.pathname === "/requests" && !location.search.includes("new=true");
+  const isDashboardActive = location.pathname.startsWith("/requests") && !location.search.includes("new=true");
   const isNewRequestActive = location.pathname === "/requests" && location.search.includes("new=true");
   const isApprovalActive = location.pathname === "/approval";
 
