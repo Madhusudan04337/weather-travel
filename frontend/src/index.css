@@ -17,6 +17,7 @@
   --color-text-muted: #94A3B8;
   
   --color-border: #E2E8F0;
+  --color-surface-hover: #F1F5F9;
   
   --color-success: #16A34A;
   --color-warning: #F59E0B;
@@ -38,6 +39,16 @@
   --text-body-sm--line-height: 1.5;
   --text-caption: 0.75rem; /* 12px */
   --text-caption--line-height: 1.5;
+
+  /* Typography missing tokens */
+  --text-heading-s: 1.125rem; /* 18px */
+  --text-heading-s--line-height: 1.4;
+  --text-body-m: 1rem; /* same as body */
+  --text-body-m--line-height: 1.5;
+  --text-small: 0.8125rem; /* 13px */
+  --text-small--line-height: 1.5;
+  --text-card-title: 1.125rem; /* 18px */
+  --text-card-title--line-height: 1.3;
 
   /* Border Radius */
   --radius-button: 12px;

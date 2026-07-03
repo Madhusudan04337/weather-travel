@@ -11,7 +11,7 @@ interface NavbarProps {
   onTogglePanel: () => void;
 }
 
-export function Navbar({ isPanelOpen, onTogglePanel }: NavbarProps) {
+export function Navbar({ isPanelOpen: _isPanelOpen, onTogglePanel }: NavbarProps) {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -33,7 +33,7 @@ export function Navbar({ isPanelOpen, onTogglePanel }: NavbarProps) {
   };
 
   return (
-    <aside className="sticky top-0 z-50 w-16 h-screen flex flex-col items-center justify-between py-4 border-r border-border bg-surface shadow-sm select-none">
+    <aside className="sticky top-0 z-50 w-16 h-screen hidden md:flex flex-col items-center justify-between py-4 border-r border-border bg-surface shadow-sm select-none">
       <div className="flex flex-col items-center gap-6 w-full">
         {/* App Logo / Brand Trigger */}
         <Link to="/" className="flex items-center justify-center w-10 h-10 rounded-xl bg-brand/10 text-brand hover:scale-105 transition-transform">

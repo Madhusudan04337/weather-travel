@@ -24,7 +24,7 @@ export function MainLayout() {
       
       {/* VS Code Side Panel */}
       {isPanelOpen && (
-        <div className="w-64 h-screen border-r border-border bg-surface flex flex-col select-none animate-in slide-in-from-left duration-200">
+        <div className="w-64 h-screen border-r border-border bg-surface hidden md:flex flex-col select-none animate-in slide-in-from-left duration-200">
           <div className="px-4 border-b border-border h-16 flex items-center justify-between bg-surface/50">
             <span className="font-semibold text-text-primary uppercase tracking-wider text-[11px]">
               {isNewRequestActive ? "New Request" : isApprovalActive ? "Approval Queue" : "Travel Requests"}
@@ -108,6 +108,15 @@ export function MainLayout() {
       )}
 
       <main className="flex-1 min-h-screen overflow-y-auto bg-background">
+        {/* Mobile header - only visible on small screens */}
+        <div className="md:hidden flex items-center gap-3 px-4 py-3 border-b border-border bg-surface sticky top-0 z-40">
+          <Link to="/" className="font-bold text-brand text-body">Weather Travel</Link>
+          <nav className="flex items-center gap-4 ml-auto">
+            <Link to="/requests" className="text-body-sm text-text-secondary hover:text-brand transition-colors">Dashboard</Link>
+            <Link to="/requests?new=true" className="text-body-sm text-text-secondary hover:text-brand transition-colors">New</Link>
+            <Link to="/approval" className="text-body-sm text-text-secondary hover:text-brand transition-colors">Approvals</Link>
+          </nav>
+        </div>
         <div className="px-8 py-8 w-full">
           <Outlet />
         </div>
