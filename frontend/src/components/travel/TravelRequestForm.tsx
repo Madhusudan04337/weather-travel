@@ -141,6 +141,7 @@ export function TravelRequestForm({
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <Input
           label="Destination City"
+          required
           {...register("destination_city")}
           error={errors.destination_city?.message}
         />
@@ -151,6 +152,7 @@ export function TravelRequestForm({
               <Input
                 type="date"
                 label="Travel Date"
+                required
                 {...register("travel_date")}
                 error={errors.travel_date?.message}
               />
