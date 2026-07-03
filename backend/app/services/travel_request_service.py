@@ -22,7 +22,7 @@ from typing import Any
 
 import httpx
 from app.schemas.recommendation import Recommendation
-from app.models.travel_request import Approval, ApprovalStatus, TravelRequestStatus
+from app.models.travel_request import Approval, ApprovalStatus, TravelRequestStatus, FulfillmentTask, TaskStatus
 
 from app.core.exceptions import (
     BusinessRuleError,
@@ -267,6 +267,105 @@ class TravelRequestService:
             raise NotFoundError(f"Travel request '{id}' not found.")
             
         logger.info("Travel request rejected: %s", id)
+        return TravelRequestResponse.from_model(updated)
+
+    async def create_fulfillment_tasks(self, id: str) -> TravelRequestResponse:
+        """Create the three standard fulfillment tasks for an approved request."""
+        try:
+            existing = await self._repo.get_by_id(id)
+        except RepositoryError as exc:
+            raise ServiceError(f"Could not retrieve travel request: {exc.detail}") from exc
+
+        if not existing:
+            raise NotFoundError(f"Travel request '{id}' not found.")
+
+        if existing.status != TravelRequestStatus.APPROVED:
+            raise BusinessRuleError("Fulfillment tasks can only be created for approved requests.")
+
+        if existing.tasks:
+            raise BusinessRuleError("Fulfillment tasks have already been created for this request.")
+
+        tasks = [
+            FulfillmentTask(
+                id="check_weather",
+                title="Check Weather Conditions",
+                description="Verify the latest weather forecast for the destination and travel date.",
+            ),
+            FulfillmentTask(
+                id="generate_recommendation",
+                title="Generate Travel Recommendation",
+                description="Analyse weather data and generate a personalised travel recommendation.",
+            ),
+            FulfillmentTask(
+                id="share_recommendation",
+                title="Share Recommendation with Requester",
+                description="Send the travel recommendation and weather report to the requester via email.",
+            ),
+        ]
+
+        try:
+            await self._repo.update_tasks(id, tasks)
+        except RepositoryError as exc:
+            raise ServiceError(f"Could not create fulfillment tasks: {exc.detail}") from exc
+
+        # Reload fresh document
+        updated = await self._repo.get_by_id(id)
+        if not updated:
+            raise NotFoundError(f"Travel request '{id}' not found after task creation.")
+
+        logger.info("Created fulfillment tasks for travel request %s", id)
+        return TravelRequestResponse.from_model(updated)
+
+    async def complete_task(self, request_id: str, task_id: str) -> TravelRequestResponse:
+        """Mark a fulfillment task as completed. Auto-closes the request when all tasks are done."""
+        try:
+            existing = await self._repo.get_by_id(request_id)
+        except RepositoryError as exc:
+            raise ServiceError(f"Could not retrieve travel request: {exc.detail}") from exc
+
+        if not existing:
+            raise NotFoundError(f"Travel request '{request_id}' not found.")
+
+        # Parse tasks from raw dicts
+        tasks = [FulfillmentTask(**t) for t in existing.tasks]
+
+        # Find the target task
+        target = next((t for t in tasks if t.id == task_id), None)
+        if not target:
+            raise BusinessRuleError(f"Task '{task_id}' not found on this request.")
+
+        if target.status == TaskStatus.COMPLETED:
+            raise BusinessRuleError(f"Task '{task_id}' is already completed.")
+
+        # Mark task complete
+        target.status = TaskStatus.COMPLETED
+        target.completed_at = datetime.now(tz=timezone.utc)
+
+        try:
+            await self._repo.update_tasks(request_id, tasks)
+        except RepositoryError as exc:
+            raise ServiceError(f"Could not complete task: {exc.detail}") from exc
+
+        # Check if all tasks completed -> auto-close
+        all_done = all(t.status == TaskStatus.COMPLETED for t in tasks)
+        if all_done:
+            try:
+                await self._repo.update(request_id, TravelRequestUpdate(status=TravelRequestStatus.CLOSED))
+            except RepositoryError as exc:
+                raise ServiceError(f"Could not close travel request: {exc.detail}") from exc
+
+            # Simulated email notification
+            logger.info(
+                "[EMAIL SIMULATED] Closure notification sent for travel request %s to requester.",
+                request_id,
+            )
+
+        # Reload fresh document
+        updated = await self._repo.get_by_id(request_id)
+        if not updated:
+            raise NotFoundError(f"Travel request '{request_id}' not found.")
+
+        logger.info("Completed task '%s' on travel request %s", task_id, request_id)
         return TravelRequestResponse.from_model(updated)
 
     async def list(

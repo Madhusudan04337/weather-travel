@@ -32,7 +32,7 @@ from pymongo.errors import PyMongoError
 
 from app.core.constants import TRAVEL_REQUEST_COLLECTION
 from app.core.exceptions import RepositoryError
-from app.models.travel_request import TravelRequestModel, TravelRequestStatus, Approval
+from app.models.travel_request import TravelRequestModel, TravelRequestStatus, Approval, FulfillmentTask
 from app.schemas.travel_request import TravelRequestCreate, TravelRequestUpdate
 from app.schemas.weather import WeatherSummary
 from app.schemas.recommendation import Recommendation
@@ -428,6 +428,48 @@ class TravelRequestRepository:
         except PyMongoError as exc:
             logger.exception("MongoDB error during update_approval(%s)", id)
             raise RepositoryError("update_approval", str(exc)) from exc
+
+    async def update_tasks(self, id: str, tasks: list[FulfillmentTask]) -> bool:
+        """
+        Replace the tasks list for a specific travel request document.
+        Also stamps updated_at.
+
+        Parameters
+        ----------
+        id:
+            String ObjectId of the document to update.
+        tasks:
+            The list of FulfillmentTask objects to persist.
+
+        Returns
+        -------
+        bool
+            ``True`` if the document was updated, ``False`` if not found.
+
+        Raises
+        ------
+        RepositoryError
+            If the database operation fails.
+        """
+        oid = self._to_object_id(id)
+        if oid is None:
+            logger.debug("update_tasks: '%s' is not a valid ObjectId", id)
+            return False
+        try:
+            result = await self._col.update_one(
+                {"_id": oid},
+                {"$set": {
+                    "tasks": [t.model_dump(mode="json") for t in tasks],
+                    "updated_at": datetime.now(tz=timezone.utc),
+                }}
+            )
+            updated = result.modified_count == 1
+            if updated:
+                logger.info("Updated tasks for travel request %s", id)
+            return updated
+        except PyMongoError as exc:
+            logger.exception("MongoDB error during update_tasks(%s)", id)
+            raise RepositoryError("update_tasks", str(exc)) from exc
 
     async def delete(self, id: str) -> bool:
         """

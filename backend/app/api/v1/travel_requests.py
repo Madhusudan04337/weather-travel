@@ -7,8 +7,7 @@ not know about MongoDB, and it does not contain business rules.
 """
 from __future__ import annotations
 
-from typing import Any
-
+from pydantic import BaseModel
 from fastapi import APIRouter, Depends, Query, status
 
 from app.api.dependencies import get_travel_request_service
@@ -19,6 +18,10 @@ from app.schemas.travel_request import (
     TravelRequestUpdate,
 )
 from app.services.travel_request_service import TravelRequestService
+
+
+class RejectPayload(BaseModel):
+    remarks: str | None = None
 
 router = APIRouter(prefix="/requests", tags=["Travel Requests"])
 
@@ -62,17 +65,32 @@ async def list_travel_requests(
     return await service.list(filters=None, skip=skip, limit=limit)
 
 
-@router.patch(
-    "/{id}",
+# ── Specific sub-resource routes MUST come before the generic /{id} routes ──
+
+@router.post(
+    "/{id}/tasks",
     response_model=TravelRequestResponse,
-    summary="Partially update a travel request",
+    status_code=status.HTTP_201_CREATED,
+    summary="Create fulfillment tasks for an approved travel request",
 )
-async def update_travel_request(
+async def create_fulfillment_tasks(
     id: str,
-    data: TravelRequestUpdate,
     service: TravelRequestService = Depends(get_travel_request_service),
 ) -> TravelRequestResponse:
-    return await service.update(id, data)
+    return await service.create_fulfillment_tasks(id)
+
+
+@router.patch(
+    "/{id}/tasks/{task_id}/complete",
+    response_model=TravelRequestResponse,
+    summary="Mark a fulfillment task as completed",
+)
+async def complete_task(
+    id: str,
+    task_id: str,
+    service: TravelRequestService = Depends(get_travel_request_service),
+) -> TravelRequestResponse:
+    return await service.complete_task(request_id=id, task_id=task_id)
 
 
 @router.patch(
@@ -86,9 +104,6 @@ async def approve_travel_request(
 ) -> TravelRequestResponse:
     return await service.approve_request(id)
 
-from pydantic import BaseModel
-class RejectPayload(BaseModel):
-    remarks: str | None = None
 
 @router.patch(
     "/{id}/reject",
@@ -101,6 +116,22 @@ async def reject_travel_request(
     service: TravelRequestService = Depends(get_travel_request_service),
 ) -> TravelRequestResponse:
     return await service.reject_request(id, remarks=payload.remarks)
+
+
+# ── Generic /{id} routes (must come AFTER specific sub-resource routes) ──
+
+@router.patch(
+    "/{id}",
+    response_model=TravelRequestResponse,
+    summary="Partially update a travel request",
+)
+async def update_travel_request(
+    id: str,
+    data: TravelRequestUpdate,
+    service: TravelRequestService = Depends(get_travel_request_service),
+) -> TravelRequestResponse:
+    return await service.update(id, data)
+
 
 @router.delete(
     "/{id}",

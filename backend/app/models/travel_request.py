@@ -49,6 +49,24 @@ class ApprovalStatus(str, Enum):
     APPROVED = "Approved"
     REJECTED = "Rejected"
 
+
+class TaskStatus(str, Enum):
+    """Status of a fulfillment task."""
+
+    PENDING = "Pending"
+    COMPLETED = "Completed"
+
+
+class FulfillmentTask(BaseModel):
+    """A single fulfillment task attached to an approved travel request."""
+
+    id: str
+    title: str
+    description: str
+    status: TaskStatus = TaskStatus.PENDING
+    completed_at: datetime | None = None
+
+
 class Approval(BaseModel):
     """
     Approval workflow information.
