@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
 import { Input, Select, Switch, Textarea, Button } from "../ui";
+import { CityAutocomplete } from "../ui/CityAutocomplete";
 import { travelRequestApi } from "../../services/travelRequestApi";
 import { TRIP_TYPES, BUDGET_RANGES } from "../../constants/travel-request";
 import { TripType, BudgetRange } from "../../types/travel-request";
@@ -139,10 +140,12 @@ export function TravelRequestForm({
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <Input
+        <CityAutocomplete
           label="Destination City"
-          required
-          {...register("destination_city")}
+          value={watch("destination_city")}
+          onChange={(val) => {
+            methods.setValue("destination_city", val, { shouldValidate: true });
+          }}
           error={errors.destination_city?.message}
         />
 
