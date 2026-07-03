@@ -40,3 +40,26 @@ export function useRejectTravelRequest() {
     },
   });
 }
+
+export function useCreateFulfillmentTasks() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => travelRequestApi.createTasksForRequest(id),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["travelRequests"] });
+      queryClient.invalidateQueries({ queryKey: ["travelRequest", data.id] });
+    },
+  });
+}
+
+export function useCompleteTask() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ requestId, taskId }: { requestId: string; taskId: string }) =>
+      travelRequestApi.completeTask(requestId, taskId),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["travelRequests"] });
+      queryClient.invalidateQueries({ queryKey: ["travelRequest", data.id] });
+    },
+  });
+}

@@ -42,4 +42,14 @@ export const travelRequestApi = {
     const response = await apiClient.patch<TravelRequest>(`/requests/${id}/reject`, { remarks });
     return response.data;
   },
+
+  createTasksForRequest: async (id: string): Promise<TravelRequest> => {
+    const response = await apiClient.post<TravelRequest>(`/requests/${id}/tasks`);
+    return response.data;
+  },
+
+  completeTask: async (requestId: string, taskId: string): Promise<TravelRequest> => {
+    const response = await apiClient.patch<TravelRequest>(`/requests/${requestId}/tasks/${taskId}/complete`);
+    return response.data;
+  },
 };

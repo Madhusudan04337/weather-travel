@@ -77,6 +77,7 @@ export interface TravelRequest {
   weather?: WeatherSummary | null;
   recommendation?: Recommendation | null;
   approval?: Approval | null;
+  tasks: FulfillmentTask[];
   created_at: string;
   updated_at: string;
 }
@@ -104,4 +105,18 @@ export interface TravelRequestListResponse {
   skip: number;
   limit: number;
   data: TravelRequest[];
+}
+
+export const TaskStatus = {
+  PENDING: "Pending",
+  COMPLETED: "Completed",
+} as const;
+export type TaskStatus = typeof TaskStatus[keyof typeof TaskStatus];
+
+export interface FulfillmentTask {
+  id: string;
+  title: string;
+  description: string;
+  status: TaskStatus;
+  completed_at: string | null;
 }
