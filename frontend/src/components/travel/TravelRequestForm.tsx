@@ -6,7 +6,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
-import { Input, Select, Switch, Textarea, Button } from "../ui";
+import { Input, Select, Textarea, Button } from "../ui";
 import { CityAutocomplete } from "../ui/CityAutocomplete";
 import { travelRequestApi } from "../../services/travelRequestApi";
 import { TRIP_TYPES, BUDGET_RANGES } from "../../constants/travel-request";
@@ -52,12 +52,14 @@ export interface TravelRequestFormProps {
   mode?: "create" | "edit";
   initialValues?: Partial<TravelRequestFormData> & { id?: string };
   onSuccess?: () => void;
+  onCancel?: () => void;
 }
 
 export function TravelRequestForm({
   mode = "create",
   initialValues,
   onSuccess,
+  onCancel,
 }: TravelRequestFormProps = {}) {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -162,6 +164,7 @@ export function TravelRequestForm({
 
               <Select
                 label="Trip Type"
+                required
                 options={[
                   { label: "Select Trip Type", value: "" },
                   ...TRIP_TYPES,
@@ -171,23 +174,37 @@ export function TravelRequestForm({
               />
             </div>
 
-            <Select
-              label="Budget Range"
-              options={[
-                { label: "Select Budget", value: "" },
-                ...BUDGET_RANGES,
-              ]}
-              {...register("budget_range")}
-              error={errors.budget_range?.message}
-            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Select
+                label="Budget Range"
+                required
+                options={[
+                  { label: "Select Budget", value: "" },
+                  ...BUDGET_RANGES,
+                ]}
+                {...register("budget_range")}
+                error={errors.budget_range?.message}
+              />
+            </div>
 
-            <Switch
-              label="Special Needs"
-              description="Do you require wheelchair access, dietary accommodations, etc.?"
-              checked={specialNeeds}
-              {...register("special_needs")}
-              onChange={(e) => methods.setValue("special_needs", e.target.checked, { shouldValidate: true })}
-            />
+            <div className="flex items-center gap-3 py-2">
+              <input
+                type="checkbox"
+                id="special_needs"
+                className="w-5 h-5 rounded border-border text-brand focus:ring-brand focus:ring-offset-2 transition-all cursor-pointer"
+                checked={specialNeeds}
+                {...register("special_needs")}
+                onChange={(e) => methods.setValue("special_needs", e.target.checked, { shouldValidate: true })}
+              />
+              <div className="flex flex-col">
+                <label htmlFor="special_needs" className="text-body-sm font-medium text-text-primary cursor-pointer select-none">
+                  Special Needs
+                </label>
+                <p className="text-caption text-text-secondary select-none">
+                  Do you require wheelchair access, dietary accommodations, etc.?
+                </p>
+              </div>
+            </div>
 
             {specialNeeds && (
               <div className="animate-in fade-in slide-in-from-top-2 duration-300">
@@ -202,11 +219,22 @@ export function TravelRequestForm({
           </div>
         )}
 
-        <div className="pt-4 flex justify-end border-t border-border mt-8">
+        <div className="pt-6 flex justify-end gap-3 border-t border-border mt-8">
+          {onCancel && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCancel}
+              className="px-6 text-text-secondary hover:text-text-primary hover:bg-surface-hover"
+            >
+              Cancel
+            </Button>
+          )}
           <Button
             type="submit"
             disabled={!hasDestination || mutation.isPending}
             isLoading={mutation.isPending}
+            className="px-8"
           >
             {mode === "edit" ? "Save Changes" : "Create Request"}
           </Button>

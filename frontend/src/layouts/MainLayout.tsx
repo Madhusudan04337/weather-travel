@@ -1,24 +1,7 @@
-import { useState } from "react";
-import { Outlet, useLocation, Link } from "react-router-dom";
+import { Outlet, Link } from "react-router-dom";
 import { Navbar } from "../components/layout/Navbar";
-import { useTravelRequests } from "../hooks/useTravelRequests";
-import { usePendingApprovals } from "../hooks/usePendingApprovals";
-import { cn } from "../utils/cn";
 
 export function MainLayout() {
-  const location = useLocation();
-
-  const { data: requestsData, isLoading: isRequestsLoading } = useTravelRequests();
-  const { data: pendingRequests, isLoading: isPendingLoading } = usePendingApprovals();
-
-  const requests = requestsData?.data || [];
-
-  const isNewRequestActive = location.pathname === "/requests" && location.search.includes("new=true");
-  const isAllRequestsActive = location.pathname === "/all-requests";
-  const isApprovalActive = location.pathname === "/approval";
-  const isDashboardActive = location.pathname === "/requests" && !location.search.includes("new=true");
-  const isDetailsPage = location.pathname.match(/^\/requests\/[^\/]+$/);
-
   return (
     <div className="relative flex h-screen overflow-hidden flex-row bg-background">
       <Navbar />

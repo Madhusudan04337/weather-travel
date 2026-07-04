@@ -69,13 +69,10 @@ export function TravelRequestPage() {
       {showForm && (
         <Card className="w-full max-w-2xl">
           <CardContent className="pt-5">
-            <div className="mb-5 flex items-center justify-between gap-3">
+            <div className="mb-5 flex items-center justify-between gap-3 border-b border-border pb-4">
               <h2 className="text-heading-m font-semibold truncate">Create New Request</h2>
-              <Button variant="ghost" size="sm" onClick={() => setShowForm(false)} className="shrink-0">
-                Cancel
-              </Button>
             </div>
-            <TravelRequestForm onSuccess={() => setShowForm(false)} />
+            <TravelRequestForm onSuccess={() => setShowForm(false)} onCancel={() => setShowForm(false)} />
           </CardContent>
         </Card>
       )}

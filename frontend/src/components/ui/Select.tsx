@@ -4,11 +4,12 @@ import { cn } from "../../utils/cn";
 export interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   error?: string;
   label?: string;
+  required?: boolean;
   options: { label: string; value: string | number }[];
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ className, error, label, id, disabled, options, ...props }, ref) => {
+  ({ className, error, label, id, disabled, required, options, ...props }, ref) => {
     const selectId = id || (label ? `select-${label.replace(/\s+/g, '-').toLowerCase()}` : undefined);
 
     return (
@@ -17,11 +18,12 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           <label
             htmlFor={selectId}
             className={cn(
-              "text-body-sm font-medium text-text-primary",
+              "text-body-sm font-medium text-text-secondary flex items-center gap-0.5",
               disabled && "opacity-50"
             )}
           >
-            {label}
+            <span>{label}</span>
+            {required && <span className="text-error font-bold ml-0.5">*</span>}
           </label>
         )}
         <div className="relative">

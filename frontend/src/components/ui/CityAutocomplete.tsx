@@ -98,8 +98,8 @@ export function CityAutocomplete({ value, onChange, error, label = "Destination 
   return (
     <div className="relative" ref={dropdownRef}>
       {label && (
-        <label className="block text-sm font-medium text-foreground mb-1.5">
-          {label} <span className="text-danger">*</span>
+        <label className="text-body-sm font-medium text-text-secondary flex items-center gap-0.5 mb-1.5">
+          <span>{label}</span> <span className="text-error font-bold ml-0.5">*</span>
         </label>
       )}
       <div className="relative">
