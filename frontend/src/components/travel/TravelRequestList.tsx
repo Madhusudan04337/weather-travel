@@ -6,11 +6,10 @@ import { toast } from "sonner";
 
 interface TravelRequestListProps {
   requests: TravelRequest[];
-  columns?: 2 | 3;
   layout?: "grid" | "horizontal";
 }
 
-export function TravelRequestList({ requests, columns = 2, layout = "grid" }: TravelRequestListProps) {
+export function TravelRequestList({ requests, layout = "grid" }: TravelRequestListProps) {
   const deleteMutation = useDeleteTravelRequest();
   const navigate = useNavigate();
 
@@ -44,12 +43,8 @@ export function TravelRequestList({ requests, columns = 2, layout = "grid" }: Tr
     );
   }
 
-  const gridClass = columns === 3 
-    ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6" 
-    : "grid grid-cols-1 lg:grid-cols-2 gap-6";
-
   return (
-    <div className={gridClass}>
+    <div className="grid gap-6 grid-cols-[repeat(auto-fill,minmax(360px,1fr))]">
       {requests.map((request) => (
         <TravelRequestCard
           key={request.id}

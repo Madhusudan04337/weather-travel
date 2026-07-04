@@ -1,5 +1,5 @@
 import { useSearchParams, useNavigate } from "react-router-dom";
-
+import { PageHeader } from "../components/layout/PageHeader";
 import { Card, CardContent } from "../components/ui/Card";
 import { ErrorState } from "../components/ui/ErrorState";
 import { TravelRequestForm } from "../components/travel/TravelRequestForm";
@@ -34,10 +34,11 @@ export function TravelRequestPage() {
   return (
     <div className="flex flex-col gap-6">
       {!showForm && (
-        <div className="flex items-center justify-between">
-          <p className="text-text-secondary text-body-m">Manage your travel requests and get weather-aware recommendations.</p>
-          <Button onClick={() => setShowForm(true)}>New Request</Button>
-        </div>
+        <PageHeader 
+          title="Overview Dashboard"
+          description="Manage your travel requests and get weather-aware recommendations."
+          action={<Button onClick={() => setShowForm(true)}>New Request</Button>}
+        />
       )}
 
       {!showForm && (
@@ -84,7 +85,7 @@ export function TravelRequestPage() {
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <h2 className="text-heading-m font-semibold text-text-primary">Recent Requests</h2>
-            {!isLoading && !isError && requests.length > 0 && (
+            {!isLoading && !isError && requests.length > 6 && (
               <Button variant="ghost" onClick={() => navigate("/all-requests")}>
                 View All
               </Button>
