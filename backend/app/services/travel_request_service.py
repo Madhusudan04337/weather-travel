@@ -111,7 +111,8 @@ class TravelRequestService:
             )
             forecast_unavailable = False
         except CityNotFoundError:
-            raise BusinessRuleError("Destination city not found. Please enter a valid destination city.")
+            from app.core.exceptions import BadRequestError
+            raise BadRequestError("Destination city not found. Please enter a valid destination city.")
         except httpx.HTTPStatusError as exc:
             if exc.response.status_code == 400:
                 logger.info("Weather forecast unavailable for date %s", data.travel_date)

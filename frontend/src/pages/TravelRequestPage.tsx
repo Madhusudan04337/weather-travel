@@ -7,7 +7,7 @@ import { TravelRequestList } from "../components/travel/TravelRequestList";
 import { EmptyState } from "../components/travel/EmptyState";
 import { LoadingSkeleton } from "../components/travel/LoadingSkeleton";
 import { useTravelRequests } from "../hooks/useTravelRequests";
-import { TravelRequestStatus } from "../types/travel-request";
+import { TravelRequestStatus, ApprovalStatus } from "../types/travel-request";
 import { Button } from "../components/ui/Button";
 
 export function TravelRequestPage() {
@@ -24,10 +24,11 @@ export function TravelRequestPage() {
   const requests = data?.data || [];
 
   const stats = {
-    total:    requests.length,
-    pending:  requests.filter((r) => r.status === TravelRequestStatus.PENDING).length,
-    approved: requests.filter((r) => r.status === TravelRequestStatus.APPROVED).length,
-    rejected: requests.filter((r) => r.status === TravelRequestStatus.REJECTED).length,
+    total:           requests.length,
+    pending:         requests.filter((r) => r.status === TravelRequestStatus.PENDING).length,
+    approvalPending: requests.filter((r) => r.approval?.status === ApprovalStatus.PENDING).length,
+    completed:       requests.filter((r) => r.status === TravelRequestStatus.CLOSED).length,
+    rejected:        requests.filter((r) => r.status === TravelRequestStatus.REJECTED).length,
   };
 
   return (
@@ -43,12 +44,13 @@ export function TravelRequestPage() {
         <>
           {/* ── Stat Cards ── */}
           {!isLoading && !isError && requests.length > 0 && (
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
               {[
-                { label: "Total",    value: stats.total,    color: "text-text-primary" },
-                { label: "Pending",  value: stats.pending,  color: "text-accent" },
-                { label: "Approved", value: stats.approved, color: "text-success" },
-                { label: "Rejected", value: stats.rejected, color: "text-error" },
+                { label: "Total Requests",   value: stats.total,           color: "text-text-primary" },
+                { label: "Pending",          value: stats.pending,         color: "text-accent" },
+                { label: "Approval Pending", value: stats.approvalPending, color: "text-warning" },
+                { label: "Completed",        value: stats.completed,       color: "text-success" },
+                { label: "Rejected",         value: stats.rejected,        color: "text-error" },
               ].map(({ label, value, color }) => (
                 <Card key={label}>
                   <CardContent className="p-4 sm:p-5">

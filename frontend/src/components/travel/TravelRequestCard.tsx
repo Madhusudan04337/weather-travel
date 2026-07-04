@@ -1,5 +1,6 @@
 import type { TravelRequest } from "../../types/travel-request";
 import { Button } from "../ui/Button";
+import { cn } from "../../utils/cn";
 import { StatusBadge } from "./StatusBadge";
 
 interface TravelRequestCardProps {
@@ -51,20 +52,37 @@ export function TravelRequestCard({
         <div className="flex flex-col gap-2">
           <div className="flex items-center flex-wrap gap-2">
             <StatusBadge status={request.status} />
-            <span className="inline-flex items-center gap-1 text-body-sm font-medium text-text-secondary bg-surface-hover px-2 py-0.5 rounded border border-border">
+            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-text-secondary bg-surface-hover px-2 py-0.5 rounded border border-border">
               💰 <span className="capitalize">{request.budget_range}</span>
             </span>
           </div>
 
           <div className="flex flex-wrap gap-2 mt-1">
-            {requiresApproval && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-caption font-semibold bg-accent/10 text-accent border border-accent/20">
-                👨‍💼 Approval Required
+            {requiresApproval && request.approval && (
+              <span className={cn(
+                "inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold border",
+                request.approval.status === 'Approved' ? "bg-success/10 text-success border-success/20" :
+                request.approval.status === 'Rejected' ? "bg-error/10 text-error border-error/20" :
+                "bg-warning/10 text-warning border-warning/20"
+              )}>
+                {request.approval.status === 'Approved' ? "✅ Manager Approved" :
+                 request.approval.status === 'Rejected' ? "❌ Manager Rejected" :
+                 "⏳ Approval Pending"}
+              </span>
+            )}
+            {!requiresApproval && request.status !== "Closed" && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-surface-hover text-text-secondary border border-border">
+                ✈️ Auto-Approved
               </span>
             )}
             {request.weather && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-caption font-semibold bg-success/10 text-success border border-success/20">
-                ⚡ Weather Ready
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-accent/10 text-accent border border-accent/20">
+                ☁️ Weather Synced
+              </span>
+            )}
+            {request.status === "Closed" && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-brand/10 text-brand border border-brand/20">
+                🎉 Fully Fulfilled
               </span>
             )}
           </div>

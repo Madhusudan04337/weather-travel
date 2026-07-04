@@ -10,6 +10,7 @@ AppError
 ├── RepositoryError          — database I/O failures
 ├── ServiceError             — base for all domain-level errors
 │   ├── NotFoundError        — resource does not exist          → HTTP 404
+│   ├── BadRequestError      — invalid input data               → HTTP 400
 │   ├── ConflictError        — operation conflicts with state   → HTTP 409
 │   ├── BusinessRuleError    — domain rule violation            → HTTP 422
 │   └── ValidationError      — input fails domain validation    → HTTP 422
@@ -91,6 +92,15 @@ class ConflictError(ServiceError):
 
     Example: creating a duplicate entry where uniqueness is required.
     Maps to HTTP 409 Conflict.
+    """
+
+
+class BadRequestError(ServiceError):
+    """
+    Raised when input fails validation that cannot be processed.
+
+    Example: destination city is not found by geocoding API.
+    Maps to HTTP 400 Bad Request.
     """
 
 

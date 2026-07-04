@@ -42,7 +42,7 @@ export function TravelRequestDetailsPage() {
   const updatedAt = new Date(request.updated_at).toLocaleString();
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6">
       <PageHeader
         title={`Travel to ${request.destination_city}`}
         description="Detailed view of the travel request."
@@ -69,57 +69,61 @@ export function TravelRequestDetailsPage() {
               <StatusBadge status={request.status} />
             </div>
           </CardHeader>
-          <CardContent className="flex flex-col gap-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <div className="text-caption font-medium text-text-secondary">Destination</div>
-                <div className="text-body text-text-primary mt-1">{request.destination_city}</div>
+          <CardContent className="flex flex-col gap-0 p-5">
+            {/* Core Info */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-5 gap-x-6">
+              <div className="flex flex-col gap-1">
+                <span className="text-caption font-medium text-text-secondary uppercase tracking-wider">Destination</span>
+                <span className="text-body-m font-semibold text-text-primary">{request.destination_city}</span>
               </div>
-              <div>
-                <div className="text-caption font-medium text-text-secondary">Travel Date</div>
-                <div className="text-body text-text-primary mt-1">{travelDate}</div>
+              <div className="flex flex-col gap-1">
+                <span className="text-caption font-medium text-text-secondary uppercase tracking-wider">Travel Date</span>
+                <span className="text-body-m font-semibold text-text-primary">{travelDate}</span>
               </div>
-              <div>
-                <div className="text-caption font-medium text-text-secondary">Trip Type</div>
-                <div className="text-body text-text-primary mt-1 capitalize break-words">{request.trip_type}</div>
+              <div className="flex flex-col gap-1">
+                <span className="text-caption font-medium text-text-secondary uppercase tracking-wider">Trip Type</span>
+                <span className="text-body-m font-semibold text-text-primary capitalize">{request.trip_type}</span>
               </div>
-              <div>
-                <div className="text-caption font-medium text-text-secondary">Budget Range</div>
-                <div className="text-body text-text-primary mt-1 capitalize break-words">{request.budget_range}</div>
-              </div>
-            </div>
-
-            <div className="mt-2">
-              <div className="text-caption font-medium text-text-secondary">Special Needs</div>
-              <div className="text-body text-text-primary mt-1">
-                {request.special_needs ? "Yes" : "No"}
+              <div className="flex flex-col gap-1">
+                <span className="text-caption font-medium text-text-secondary uppercase tracking-wider">Budget Range</span>
+                <span className="text-body-m font-semibold text-text-primary capitalize">{request.budget_range}</span>
               </div>
             </div>
 
-            {request.notes && (
-              <div className="mt-2">
-                <div className="text-caption font-medium text-text-secondary">Notes</div>
-                <div className="text-body text-text-primary mt-1 whitespace-pre-wrap">
-                  {request.notes}
+            {/* Additional Details */}
+            <div className="mt-5 pt-5 border-t border-border grid grid-cols-1 sm:grid-cols-2 gap-y-5 gap-x-6">
+              <div className="flex flex-col gap-1">
+                <span className="text-caption font-medium text-text-secondary uppercase tracking-wider">Special Needs</span>
+                <span className="text-body-m font-semibold text-text-primary">
+                  {request.special_needs ? "Yes" : "No"}
+                </span>
+              </div>
+              {request.notes && (
+                <div className="flex flex-col gap-1 sm:col-span-2">
+                  <span className="text-caption font-medium text-text-secondary uppercase tracking-wider">Notes</span>
+                  <div className="text-body-m text-text-primary whitespace-pre-wrap bg-surface-hover p-3 rounded-lg border border-border mt-1">
+                    {request.notes}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
             
-            <div className="mt-4 pt-4 border-t border-border grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <div className="text-caption font-medium text-text-secondary">Created At</div>
-                <div className="text-small text-text-muted mt-1">{createdAt}</div>
+            {/* Metadata */}
+            <div className="mt-5 pt-5 border-t border-border grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-6">
+              <div className="flex flex-col gap-1">
+                <span className="text-caption font-medium text-text-secondary uppercase tracking-wider">Created At</span>
+                <span className="text-small text-text-muted">{createdAt}</span>
               </div>
-              <div>
-                <div className="text-caption font-medium text-text-secondary">Last Updated</div>
-                <div className="text-small text-text-muted mt-1">{updatedAt}</div>
+              <div className="flex flex-col gap-1">
+                <span className="text-caption font-medium text-text-secondary uppercase tracking-wider">Last Updated</span>
+                <span className="text-small text-text-muted">{updatedAt}</span>
               </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Sidebar: Weather & Recommendations */}
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-4">
           {request.weather && (
             <Card>
               <CardHeader>
