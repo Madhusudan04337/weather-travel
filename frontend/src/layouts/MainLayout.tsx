@@ -6,7 +6,6 @@ import { usePendingApprovals } from "../hooks/usePendingApprovals";
 import { cn } from "../utils/cn";
 
 export function MainLayout() {
-  const [isPanelOpen, setIsPanelOpen] = useState(true);
   const location = useLocation();
 
   const { data: requestsData, isLoading: isRequestsLoading } = useTravelRequests();
@@ -15,101 +14,27 @@ export function MainLayout() {
   const requests = requestsData?.data || [];
 
   const isNewRequestActive = location.pathname === "/requests" && location.search.includes("new=true");
+  const isAllRequestsActive = location.pathname === "/all-requests";
   const isApprovalActive = location.pathname === "/approval";
-  const isDashboardActive = location.pathname.startsWith("/requests") && !location.search.includes("new=true");
+  const isDashboardActive = location.pathname === "/requests" && !location.search.includes("new=true");
+  const isDetailsPage = location.pathname.match(/^\/requests\/[^\/]+$/);
+
+  const getHeaderTitle = () => {
+    if (isNewRequestActive) return "New Request";
+    if (isAllRequestsActive) return "All Requests";
+    if (isApprovalActive) return "Approval Queue";
+    if (isDashboardActive) return "Request Dashboard";
+    if (isDetailsPage) return "Request Details";
+    return "Weather Travel";
+  };
 
   return (
     <div className="relative flex h-screen overflow-hidden flex-row bg-background">
-      <Navbar isPanelOpen={isPanelOpen} onTogglePanel={() => setIsPanelOpen(!isPanelOpen)} />
-      
-      {/* VS Code Side Panel */}
-      {isPanelOpen && (
-        <div className="w-64 h-screen border-r border-border bg-surface hidden md:flex flex-col select-none animate-in slide-in-from-left duration-200">
-          <div className="px-4 border-b border-border h-16 flex items-center justify-between bg-surface/50">
-            <span className="font-semibold text-text-primary uppercase tracking-wider text-[11px]">
-              {isNewRequestActive ? "New Request" : isApprovalActive ? "Approval Queue" : "Travel Requests"}
-            </span>
-            <span className="text-[10px] text-text-muted bg-border/40 px-1.5 py-0.5 rounded font-mono">
-              {isNewRequestActive ? "Form" : isApprovalActive ? pendingRequests.length : requests.length}
-            </span>
-          </div>
-          
-          <div className="flex-1 overflow-y-auto p-2 flex flex-col gap-1">
-            {isNewRequestActive && (
-              <div className="p-3 text-text-secondary text-body-sm leading-relaxed">
-                Fill in the form on the right to submit a new travel request. The weather forecast and risk safety assessment will be attached automatically.
-              </div>
-            )}
-            
-            {isApprovalActive && (
-              <div className="flex flex-col gap-1">
-                {isPendingLoading && <div className="p-3 text-caption text-text-muted">Loading approvals...</div>}
-                {!isPendingLoading && pendingRequests.length === 0 && (
-                  <div className="p-3 text-caption text-text-muted text-center py-8">No pending approvals.</div>
-                )}
-                {!isPendingLoading && pendingRequests.map(req => (
-                  <Link
-                    key={req.id}
-                    to={`/requests/${req.id}`}
-                    className={cn(
-                      "p-3 rounded-lg text-body-sm font-medium flex flex-col gap-1 transition-colors border border-transparent",
-                      location.pathname === `/requests/${req.id}` 
-                        ? "bg-brand/10 text-brand border-brand/10" 
-                        : "hover:bg-surface-hover text-text-secondary"
-                    )}
-                  >
-                    <span className="font-semibold text-text-primary flex items-center gap-1.5">
-                      <span>📍</span> {req.destination_city}
-                    </span>
-                    <span className="text-caption text-text-muted pl-5">{new Date(req.travel_date).toLocaleDateString()}</span>
-                  </Link>
-                ))}
-              </div>
-            )}
+      <Navbar />
 
-            {isDashboardActive && (
-              <div className="flex flex-col gap-1">
-                {isRequestsLoading && <div className="p-3 text-caption text-text-muted">Loading requests...</div>}
-                {!isRequestsLoading && requests.length === 0 && (
-                  <div className="p-3 text-caption text-text-muted text-center py-8">No requests found.</div>
-                )}
-                {!isRequestsLoading && requests.map(req => (
-                  <Link
-                    key={req.id}
-                    to={`/requests/${req.id}`}
-                    className={cn(
-                      "p-3 rounded-lg text-body-sm font-medium flex flex-col gap-1 transition-colors border border-transparent",
-                      location.pathname === `/requests/${req.id}` 
-                        ? "bg-brand/10 text-brand border-brand/10" 
-                        : "hover:bg-surface-hover text-text-secondary"
-                    )}
-                  >
-                    <span className="font-semibold text-text-primary flex items-center gap-1.5">
-                      <span>📍</span> {req.destination_city}
-                    </span>
-                    <div className="flex items-center justify-between text-caption text-text-muted mt-1 pl-5">
-                      <span>{new Date(req.travel_date).toLocaleDateString()}</span>
-                      <span className={cn(
-                        "px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider",
-                        req.status === 'Approved' ? "bg-success/15 text-success" :
-                        req.status === 'Rejected' ? "bg-error/15 text-error" :
-                        req.status === 'Closed' ? "bg-text-secondary/15 text-text-secondary" :
-                        "bg-accent/15 text-accent"
-                      )}>
-                        {req.status}
-                      </span>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      <main className="flex-1 min-h-screen overflow-y-auto bg-background">
+      <main className="flex-1 min-h-screen overflow-y-auto bg-background flex flex-col">
         {/* Mobile header - only visible on small screens */}
-        <div className="md:hidden flex items-center gap-3 px-4 py-3 border-b border-border bg-surface sticky top-0 z-40">
+        <div className="md:hidden flex items-center gap-3 px-4 py-3 border-b border-border bg-surface sticky top-0 z-40 shrink-0">
           <Link to="/" className="font-bold text-brand text-body">Weather Travel</Link>
           <nav className="flex items-center gap-4 ml-auto">
             <Link to="/requests" className="text-body-sm text-text-secondary hover:text-brand transition-colors">Dashboard</Link>
@@ -117,7 +42,15 @@ export function MainLayout() {
             <Link to="/approval" className="text-body-sm text-text-secondary hover:text-brand transition-colors">Approvals</Link>
           </nav>
         </div>
-        <div className="px-8 py-8 w-full">
+        
+        {/* Desktop Header */}
+        <header className="hidden md:flex items-center px-8 border-b border-border bg-surface sticky top-0 z-40 h-16 shrink-0">
+          <h1 className="text-body-l font-semibold text-text-primary">
+            {getHeaderTitle()}
+          </h1>
+        </header>
+
+        <div className="px-8 py-8 w-full flex-1">
           <Outlet />
         </div>
       </main>

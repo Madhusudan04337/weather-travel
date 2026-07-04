@@ -1,5 +1,5 @@
-import { useSearchParams } from "react-router-dom";
-import { PageHeader } from "../components/layout/PageHeader";
+import { useSearchParams, useNavigate } from "react-router-dom";
+
 import { Card, CardContent } from "../components/ui/Card";
 import { ErrorState } from "../components/ui/ErrorState";
 import { TravelRequestForm } from "../components/travel/TravelRequestForm";
@@ -13,6 +13,7 @@ import { Button } from "../components/ui/Button";
 export function TravelRequestPage() {
   const { data, isLoading, isError, refetch } = useTravelRequests();
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   const showForm = searchParams.get("new") === "true";
   const setShowForm = (show: boolean) => {
@@ -31,33 +32,34 @@ export function TravelRequestPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader
-        title="Request Dashboard"
-        description="Manage your travel requests and get weather-aware recommendations."
-        action={
-          !showForm && (
-            <Button onClick={() => setShowForm(true)}>New Request</Button>
-          )
-        }
-      />
-
-      {/* ── Stat Cards ── */}
-      {!isLoading && !isError && requests.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {[
-            { label: "Total",    value: stats.total,    color: "text-text-primary" },
-            { label: "Pending",  value: stats.pending,  color: "text-accent" },
-            { label: "Approved", value: stats.approved, color: "text-success" },
-            { label: "Rejected", value: stats.rejected, color: "text-error" },
-          ].map(({ label, value, color }) => (
-            <Card key={label}>
-              <CardContent className="p-4 sm:p-5">
-                <p className="text-body-sm font-medium text-text-secondary truncate">{label}</p>
-                <p className={`mt-1 text-3xl font-bold ${color}`}>{value}</p>
-              </CardContent>
-            </Card>
-          ))}
+      {!showForm && (
+        <div className="flex items-center justify-between">
+          <p className="text-text-secondary text-body-m">Manage your travel requests and get weather-aware recommendations.</p>
+          <Button onClick={() => setShowForm(true)}>New Request</Button>
         </div>
+      )}
+
+      {!showForm && (
+        <>
+          {/* ── Stat Cards ── */}
+          {!isLoading && !isError && requests.length > 0 && (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {[
+                { label: "Total",    value: stats.total,    color: "text-text-primary" },
+                { label: "Pending",  value: stats.pending,  color: "text-accent" },
+                { label: "Approved", value: stats.approved, color: "text-success" },
+                { label: "Rejected", value: stats.rejected, color: "text-error" },
+              ].map(({ label, value, color }) => (
+                <Card key={label}>
+                  <CardContent className="p-4 sm:p-5">
+                    <p className="text-body-sm font-medium text-text-secondary truncate">{label}</p>
+                    <p className={`mt-1 text-3xl font-bold ${color}`}>{value}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </>
       )}
 
       {/* ── New Request Form ── */}
@@ -76,17 +78,26 @@ export function TravelRequestPage() {
       )}
 
       {/* ── Recent Requests ── */}
-      <div className="flex flex-col gap-4">
-        <h2 className="text-heading-m font-semibold text-text-primary">Recent Requests</h2>
-        {isLoading && <LoadingSkeleton />}
-        {isError && <ErrorState onRetry={() => refetch()} />}
-        {!isLoading && !isError && requests.length === 0 && (
-          <EmptyState onCreateClick={() => setShowForm(true)} />
-        )}
-        {!isLoading && !isError && requests.length > 0 && (
-          <TravelRequestList requests={requests} />
-        )}
-      </div>
+      {!showForm && (
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-heading-m font-semibold text-text-primary">Recent Requests</h2>
+            {!isLoading && !isError && requests.length > 0 && (
+              <Button variant="ghost" onClick={() => navigate("/all-requests")}>
+                View All
+              </Button>
+            )}
+          </div>
+          {isLoading && <LoadingSkeleton />}
+          {isError && <ErrorState onRetry={() => refetch()} />}
+          {!isLoading && !isError && requests.length === 0 && (
+            <EmptyState onCreateClick={() => setShowForm(true)} />
+          )}
+          {!isLoading && !isError && requests.length > 0 && (
+            <TravelRequestList requests={requests.slice(0, 6)} layout="horizontal" />
+          )}
+        </div>
+      )}
     </div>
   );
 }

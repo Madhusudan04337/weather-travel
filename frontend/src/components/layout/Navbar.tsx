@@ -4,32 +4,20 @@ import {
   HomeIcon,
   PlusIcon,
   ClipboardDocumentCheckIcon,
+  ListBulletIcon,
 } from "@heroicons/react/24/outline";
 
-interface NavbarProps {
-  isPanelOpen: boolean;
-  onTogglePanel: () => void;
-}
-
-export function Navbar({ isPanelOpen: _isPanelOpen, onTogglePanel }: NavbarProps) {
+export function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
 
   const isDashboardActive = location.pathname.startsWith("/requests") && !location.search.includes("new=true");
   const isNewRequestActive = location.pathname === "/requests" && location.search.includes("new=true");
+  const isAllRequestsActive = location.pathname === "/all-requests";
   const isApprovalActive = location.pathname === "/approval";
 
-  const handleIconClick = (panelName: "dashboard" | "new" | "approval", path: string) => {
-    const isActive = 
-      (panelName === "dashboard" && isDashboardActive) ||
-      (panelName === "new" && isNewRequestActive) ||
-      (panelName === "approval" && isApprovalActive);
-
-    if (isActive) {
-      onTogglePanel();
-    } else {
-      navigate(path);
-    }
+  const handleIconClick = (path: string) => {
+    navigate(path);
   };
 
   return (
@@ -47,7 +35,7 @@ export function Navbar({ isPanelOpen: _isPanelOpen, onTogglePanel }: NavbarProps
         <nav className="flex flex-col gap-4 w-full items-center">
           {/* Dashboard Link */}
           <button
-            onClick={() => handleIconClick("dashboard", "/requests")}
+            onClick={() => handleIconClick("/requests")}
             className={cn(
               "relative group flex items-center justify-center w-12 h-12 rounded-xl transition-all duration-200 cursor-pointer",
               isDashboardActive ? "bg-brand/10 text-brand" : "text-text-secondary hover:bg-surface-hover hover:text-text-primary"
@@ -65,7 +53,7 @@ export function Navbar({ isPanelOpen: _isPanelOpen, onTogglePanel }: NavbarProps
 
           {/* New Request Link */}
           <button
-            onClick={() => handleIconClick("new", "/requests?new=true")}
+            onClick={() => handleIconClick("/requests?new=true")}
             className={cn(
               "relative group flex items-center justify-center w-12 h-12 rounded-xl transition-all duration-200 cursor-pointer",
               isNewRequestActive ? "bg-brand/10 text-brand" : "text-text-secondary hover:bg-surface-hover hover:text-text-primary"
@@ -81,9 +69,27 @@ export function Navbar({ isPanelOpen: _isPanelOpen, onTogglePanel }: NavbarProps
             </span>
           </button>
 
+          {/* All Requests Link */}
+          <button
+            onClick={() => handleIconClick("/all-requests")}
+            className={cn(
+              "relative group flex items-center justify-center w-12 h-12 rounded-xl transition-all duration-200 cursor-pointer",
+              isAllRequestsActive ? "bg-brand/10 text-brand" : "text-text-secondary hover:bg-surface-hover hover:text-text-primary"
+            )}
+          >
+            {isAllRequestsActive && (
+              <span className="absolute left-0 w-1 h-6 bg-brand rounded-r" />
+            )}
+            <ListBulletIcon className="w-6 h-6" />
+            {/* Tooltip */}
+            <span className="absolute left-14 px-2.5 py-1.5 rounded-lg bg-text-primary text-white text-caption opacity-0 group-hover:opacity-100 transition-opacity duration-150 whitespace-nowrap pointer-events-none shadow-md z-50 font-medium">
+              All Requests
+            </span>
+          </button>
+
           {/* Approval Queue Link */}
           <button
-            onClick={() => handleIconClick("approval", "/approval")}
+            onClick={() => handleIconClick("/approval")}
             className={cn(
               "relative group flex items-center justify-center w-12 h-12 rounded-xl transition-all duration-200 cursor-pointer",
               isApprovalActive ? "bg-brand/10 text-brand" : "text-text-secondary hover:bg-surface-hover hover:text-text-primary"

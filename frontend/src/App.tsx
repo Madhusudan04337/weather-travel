@@ -6,6 +6,7 @@ import { TravelRequestPage } from "./pages/TravelRequestPage";
 import { TravelRequestDetailsPage } from "./pages/TravelRequestDetailsPage";
 import { TravelRequestEditPage } from "./pages/TravelRequestEditPage";
 import { ApprovalQueuePage } from "./pages/ApprovalQueuePage";
+import { AllRequestsPage } from "./pages/AllRequestsPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -27,6 +28,7 @@ function App() {
             <Route path="/requests" element={<TravelRequestPage />} />
             <Route path="/requests/:id" element={<TravelRequestDetailsPage />} />
             <Route path="/requests/:id/edit" element={<TravelRequestEditPage />} />
+            <Route path="/all-requests" element={<AllRequestsPage />} />
             <Route path="/approval" element={<ApprovalQueuePage />} />
           </Route>
         </Routes>

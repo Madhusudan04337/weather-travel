@@ -6,9 +6,11 @@ import { toast } from "sonner";
 
 interface TravelRequestListProps {
   requests: TravelRequest[];
+  columns?: 2 | 3;
+  layout?: "grid" | "horizontal";
 }
 
-export function TravelRequestList({ requests }: TravelRequestListProps) {
+export function TravelRequestList({ requests, columns = 2, layout = "grid" }: TravelRequestListProps) {
   const deleteMutation = useDeleteTravelRequest();
   const navigate = useNavigate();
 
@@ -25,8 +27,29 @@ export function TravelRequestList({ requests }: TravelRequestListProps) {
     }
   };
 
+  if (layout === "horizontal") {
+    return (
+      <div className="flex overflow-x-auto gap-6 pb-4 snap-x snap-mandatory" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
+        {requests.map((request) => (
+          <div key={request.id} className="min-w-[320px] max-w-[400px] shrink-0 snap-start">
+            <TravelRequestCard
+              request={request}
+              onView={(id) => navigate(`/requests/${id}`)}
+              onEdit={(id) => navigate(`/requests/${id}/edit`)}
+              onDelete={handleDelete}
+            />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  const gridClass = columns === 3 
+    ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6" 
+    : "grid grid-cols-1 lg:grid-cols-2 gap-6";
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className={gridClass}>
       {requests.map((request) => (
         <TravelRequestCard
           key={request.id}
