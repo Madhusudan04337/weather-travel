@@ -61,14 +61,15 @@ export function TravelRequestDetailsPage() {
       />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Main Details */}
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <h2 className="text-heading-m font-semibold">Request Details</h2>
-              <StatusBadge status={request.status} />
-            </div>
-          </CardHeader>
+        {/* Main Details Column */}
+        <div className="md:col-span-2 flex flex-col gap-6">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <h2 className="text-heading-m font-semibold">Request Details</h2>
+                <StatusBadge status={request.status} />
+              </div>
+            </CardHeader>
           <CardContent className="flex flex-col gap-0 p-5">
             {/* Core Info */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-5 gap-x-6">
@@ -120,61 +121,67 @@ export function TravelRequestDetailsPage() {
               </div>
             </div>
           </CardContent>
-        </Card>
+          </Card>
 
-        {/* Sidebar: Weather & Recommendations */}
-        <div className="flex flex-col gap-4">
-          {request.weather && (
-            <Card>
-              <CardHeader>
-                <h3 className="text-heading-s font-semibold">☀️ Weather</h3>
-              </CardHeader>
-              <CardContent className="flex flex-col gap-3">
-                <div className="text-body font-medium text-text-primary">
-                  {request.weather.forecast.weather_description}
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
-                  <div>
-                    <div className="text-caption font-medium text-text-secondary">🌡️ Temp</div>
-                    <div className="text-small text-text-primary mt-1">
-                      {request.weather.forecast.temperature_max}°C / {request.weather.forecast.temperature_min}°C
+          {/* Weather & Recommendations (2-column row) */}
+          {(request.weather || request.recommendation) && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {request.weather && (
+                <Card className="h-full">
+                  <CardHeader>
+                    <h3 className="text-heading-s font-semibold">☀️ Weather</h3>
+                  </CardHeader>
+                  <CardContent className="flex flex-col gap-3">
+                    <div className="text-body font-medium text-text-primary">
+                      {request.weather.forecast.weather_description}
                     </div>
-                  </div>
-                  <div>
-                    <div className="text-caption font-medium text-text-secondary">🌧 Rain Prob</div>
-                    <div className="text-small text-text-primary mt-1">
-                      {request.weather.forecast.precipitation_probability}%
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
+                      <div>
+                        <div className="text-caption font-medium text-text-secondary">🌡️ Temp</div>
+                        <div className="text-small text-text-primary mt-1">
+                          {request.weather.forecast.temperature_max}°C / {request.weather.forecast.temperature_min}°C
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-caption font-medium text-text-secondary">🌧 Rain Prob</div>
+                        <div className="text-small text-text-primary mt-1">
+                          {request.weather.forecast.precipitation_probability}%
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                  </CardContent>
+                </Card>
+              )}
 
-          {request.recommendation && (
-            <Card>
-              <CardHeader>
-                <h3 className="text-heading-s font-semibold">💡 Recommendation</h3>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-caption font-medium border ${
-                    request.recommendation.risk_level === 'low' ? 'bg-success/10 text-success border-success/20' :
-                    request.recommendation.risk_level === 'medium' ? 'bg-warning/10 text-warning border-warning/20' :
-                    'bg-error/10 text-error border-error/20'
-                  }`}>
-                    {request.recommendation.risk_level === 'low' ? '🟢 Low Risk' :
-                     request.recommendation.risk_level === 'medium' ? '🟡 Medium Risk' :
-                     '🔴 High Risk'}
-                  </span>
-                </div>
-                <div className="text-small text-text-primary mt-2">
-                  {request.recommendation.message}
-                </div>
-              </CardContent>
-            </Card>
+              {request.recommendation && (
+                <Card className="h-full">
+                  <CardHeader>
+                    <h3 className="text-heading-s font-semibold">💡 Recommendation</h3>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-caption font-medium border ${
+                        request.recommendation.risk_level === 'low' ? 'bg-success/10 text-success border-success/20' :
+                        request.recommendation.risk_level === 'medium' ? 'bg-warning/10 text-warning border-warning/20' :
+                        'bg-error/10 text-error border-error/20'
+                      }`}>
+                        {request.recommendation.risk_level === 'low' ? '🟢 Low Risk' :
+                         request.recommendation.risk_level === 'medium' ? '🟡 Medium Risk' :
+                         '🔴 High Risk'}
+                      </span>
+                    </div>
+                    <div className="text-small text-text-primary mt-2">
+                      {request.recommendation.message}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
           )}
+        </div>
 
+        {/* Sidebar: Approval & Tasks */}
+        <div className="flex flex-col gap-6">
           {request.approval && (
             <Card>
               <CardHeader>
