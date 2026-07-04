@@ -126,7 +126,12 @@ export function TravelRequestCard({
           </Button>
         )}
         {onDelete && request.status === "Pending" && (
-          <Button variant="danger" size="sm" onClick={() => onDelete(request.id)}>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => onDelete(request.id)}
+            className="text-error bg-error/10 hover:bg-error/20 hover:text-error"
+          >
             Delete
           </Button>
         )}
