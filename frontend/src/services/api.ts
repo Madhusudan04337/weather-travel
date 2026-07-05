@@ -1,6 +1,7 @@
 import axios from "axios";
 
-// Using Vite environment variables or fallback to local
+// In local: VITE_API_URL is unset, falls back to localhost
+// In production (Render): set VITE_API_URL in environment dashboard
 export const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1";
 
 export const apiClient = axios.create({
