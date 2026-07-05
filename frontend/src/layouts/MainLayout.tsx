@@ -20,7 +20,10 @@ export function MainLayout() {
       <main className="flex-1 min-h-screen overflow-y-auto bg-background flex flex-col">
         {/* Mobile header - only visible on small screens */}
         <div className="md:hidden flex items-center justify-between px-4 py-3 border-b border-border bg-surface sticky top-0 z-40 shrink-0">
-          <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="font-bold text-brand text-body">Weather Travel</Link>
+          <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-2">
+            <img src="/logo.jpeg" alt="Weather Travel" className="h-8 w-auto rounded-md object-contain" />
+            <span className="font-bold text-brand text-body">Weather Travel</span>
+          </Link>
           <button 
             className="text-text-secondary hover:text-text-primary focus:outline-none"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -45,7 +48,10 @@ export function MainLayout() {
             {/* Slide-in Sidebar */}
             <div className="relative flex flex-col w-64 max-w-sm h-full bg-surface border-l border-border shadow-2xl animate-in slide-in-from-right-full duration-1000 ease-out">
               <div className="flex items-center justify-between px-4 py-4 border-b border-border">
-                <span className="font-bold text-brand text-body-l">Weather Travel</span>
+                <span className="flex items-center gap-2">
+                  <img src="/logo.jpeg" alt="Weather Travel" className="h-8 w-auto rounded-md object-contain" />
+                  <span className="font-bold text-brand text-body-l">Weather Travel</span>
+                </span>
                 <button 
                   className="text-text-secondary hover:text-text-primary focus:outline-none p-1 rounded-md hover:bg-surface-hover"
                   onClick={() => setIsMobileMenuOpen(false)}

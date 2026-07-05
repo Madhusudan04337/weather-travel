@@ -43,8 +43,8 @@ export function Navbar() {
     <aside className="sticky top-0 z-50 w-16 h-screen hidden md:flex flex-col items-center justify-between py-4 border-r border-border bg-surface shadow-sm select-none">
       <div className="flex flex-col items-center gap-6 w-full">
         {/* App Logo / Brand Trigger */}
-        <Link to="/" className="flex items-center justify-center w-10 h-10 rounded-xl bg-brand/10 text-brand hover:scale-105 transition-transform">
-          <span className="font-bold text-body-l">W</span>
+        <Link to="/" className="flex items-center justify-center w-10 h-10 rounded-xl bg-brand/10 hover:scale-105 transition-transform overflow-hidden">
+          <img src="/logo.jpeg" alt="Logo" className="w-full h-full object-cover" />
         </Link>
 
         {/* Divider */}
