@@ -1,9 +1,10 @@
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { useRef } from "react";
 import { PageHeader } from "../components/layout/PageHeader";
 import { Card, CardContent } from "../components/ui/Card";
 import { ErrorState } from "../components/ui/ErrorState";
 import { TravelRequestForm } from "../components/travel/TravelRequestForm";
-import { TravelRequestList } from "../components/travel/TravelRequestList";
+import { TravelRequestList, type TravelRequestListHandle } from "../components/travel/TravelRequestList";
 import { EmptyState } from "../components/travel/EmptyState";
 import { LoadingSkeleton } from "../components/travel/LoadingSkeleton";
 import { useTravelRequests } from "../hooks/useTravelRequests";
@@ -14,6 +15,7 @@ export function TravelRequestPage() {
   const { data, isLoading, isError, refetch } = useTravelRequests();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+  const listRef = useRef<TravelRequestListHandle>(null);
 
   const showForm = searchParams.get("new") === "true";
   const setShowForm = (show: boolean) => {
@@ -72,7 +74,14 @@ export function TravelRequestPage() {
             <div className="mb-5 flex items-center justify-between gap-3 border-b border-border pb-4">
               <h2 className="text-heading-m font-semibold truncate">Create New Request</h2>
             </div>
-            <TravelRequestForm onSuccess={() => setShowForm(false)} onCancel={() => setShowForm(false)} />
+            <TravelRequestForm
+              onSuccess={() => {
+                setShowForm(false);
+                // Small delay to let the query refetch, then scroll newest card into view
+                setTimeout(() => listRef.current?.scrollToStart(), 400);
+              }}
+              onCancel={() => setShowForm(false)}
+            />
           </CardContent>
         </Card>
       )}
@@ -94,7 +103,7 @@ export function TravelRequestPage() {
             <EmptyState onCreateClick={() => setShowForm(true)} />
           )}
           {!isLoading && !isError && requests.length > 0 && (
-            <TravelRequestList requests={requests.slice(0, 6)} layout="horizontal" />
+            <TravelRequestList ref={listRef} requests={requests.slice(0, 6)} layout="horizontal" />
           )}
         </div>
       )}

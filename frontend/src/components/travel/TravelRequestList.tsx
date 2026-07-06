@@ -3,15 +3,28 @@ import { TravelRequestCard } from "./TravelRequestCard";
 import { useNavigate } from "react-router-dom";
 import { useDeleteTravelRequest } from "../../hooks/useTravelRequests";
 import { toast } from "sonner";
+import { useRef, useImperativeHandle, forwardRef } from "react";
+
+export interface TravelRequestListHandle {
+  scrollToStart: () => void;
+}
 
 interface TravelRequestListProps {
   requests: TravelRequest[];
   layout?: "grid" | "horizontal";
 }
 
-export function TravelRequestList({ requests, layout = "grid" }: TravelRequestListProps) {
+export const TravelRequestList = forwardRef<TravelRequestListHandle, TravelRequestListProps>(
+  function TravelRequestList({ requests, layout = "grid" }, ref) {
   const deleteMutation = useDeleteTravelRequest();
   const navigate = useNavigate();
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useImperativeHandle(ref, () => ({
+    scrollToStart: () => {
+      scrollRef.current?.scrollTo({ left: 0, behavior: "smooth" });
+    },
+  }));
 
   const handleDelete = (id: string) => {
     if (window.confirm("Are you sure you want to delete this travel request?")) {
@@ -28,7 +41,11 @@ export function TravelRequestList({ requests, layout = "grid" }: TravelRequestLi
 
   if (layout === "horizontal") {
     return (
-      <div className="flex overflow-x-auto gap-6 pb-4 snap-x snap-mandatory" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
+      <div
+        ref={scrollRef}
+        className="flex overflow-x-auto gap-6 pb-4 snap-x snap-mandatory"
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+      >
         {requests.map((request) => (
           <div key={request.id} className="min-w-[320px] max-w-[400px] shrink-0 snap-start">
             <TravelRequestCard
@@ -56,4 +73,4 @@ export function TravelRequestList({ requests, layout = "grid" }: TravelRequestLi
       ))}
     </div>
   );
-}
+});
