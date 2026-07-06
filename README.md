@@ -32,11 +32,11 @@ A weather-aware travel planning application that streamlines the process of requ
 
 ## 2. System Architecture
 
-![Architecture](assets/architecture.png)
+![Architecture](assets/screenshots/architecture.png)
 
 ## 3. Workflow Diagram
 
-![Workflow](assets/workflow.png)
+![Workflow](assets/screenshots/workflow.png)
 
 ## 4. Application Screenshots
 
