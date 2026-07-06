@@ -148,7 +148,7 @@ class TravelRequestService:
                 model.recommendation = recommendation.model_dump(mode="json")
                 logger.info("Attached recommendation to travel request %s", model.id)
                 
-        elif forecast_unavailable:
+        else:
             fallback_rec = Recommendation(
                 suitable=False,
                 title="Forecast Unavailable",
@@ -201,10 +201,7 @@ class TravelRequestService:
             try:
                 await self._repo.update_tasks(model.id, tasks)
                 model.tasks = [t.model_dump(mode="json") for t in tasks]
-                
-                # Advance status to APPROVED immediately since no approval is needed
-                await self._repo.update(model.id, TravelRequestUpdate(status=TravelRequestStatus.APPROVED))
-                model.status = TravelRequestStatus.APPROVED
+                logger.info("Created initial fulfillment tasks for travel request %s", model.id)
             except Exception:
                 logger.exception("Failed to create initial fulfillment tasks")
 
@@ -587,20 +584,25 @@ class TravelRequestService:
                     logger.info("Attached new recommendation to travel request %s", updated.id)
                     
             except httpx.HTTPStatusError as exc:
-                if exc.response.status_code == 400:
-                    logger.info("Weather forecast unavailable for date %s", updated.travel_date)
-                    fallback_rec = Recommendation(
-                        suitable=False,
-                        title="Forecast Unavailable",
-                        message="Weather forecast is not available yet because the selected travel date is outside the forecast window. Please check again closer to your travel date.",
-                        risk_level="medium"
-                    )
-                    await self._repo.update_recommendation(updated.id, fallback_rec)
-                    updated.recommendation = fallback_rec.model_dump(mode="json")
-                else:
-                    logger.exception("Weather integration failed with HTTP error during update")
+                logger.exception("Weather integration failed with HTTP error during update")
+                fallback_rec = Recommendation(
+                    suitable=False,
+                    title="Forecast Unavailable",
+                    message="Weather forecast is not available yet because the selected travel date is outside the forecast window. Please check again closer to your travel date.",
+                    risk_level="medium"
+                )
+                await self._repo.update_recommendation(updated.id, fallback_rec)
+                updated.recommendation = fallback_rec.model_dump(mode="json")
             except Exception:
                 logger.exception("Weather integration failed during update")
+                fallback_rec = Recommendation(
+                    suitable=False,
+                    title="Forecast Unavailable",
+                    message="Weather forecast is not available yet because the selected travel date is outside the forecast window. Please check again closer to your travel date.",
+                    risk_level="medium"
+                )
+                await self._repo.update_recommendation(updated.id, fallback_rec)
+                updated.recommendation = fallback_rec.model_dump(mode="json")
         elif needs_rec_refresh and updated.weather:
             # Only trip_type changed, we can reuse existing weather to regenerate recommendation
             try:

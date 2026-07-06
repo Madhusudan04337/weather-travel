@@ -236,7 +236,7 @@ export function TravelRequestDetailsPage() {
             </Card>
           )}
 
-          {(request.status === "Approved" || request.status === "Closed") && (
+          {(request.tasks?.length > 0 || request.status === "Approved" || request.status === "Closed") && (
             <FulfillmentTasksCard request={request} />
           )}
         </div>
