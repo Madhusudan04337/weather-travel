@@ -44,7 +44,7 @@ export function Navbar() {
       <div className="flex flex-col items-center gap-6 w-full">
         {/* App Logo / Brand Trigger */}
         <Link to="/" className="flex items-center justify-center w-10 h-10 rounded-xl bg-brand/10 hover:scale-105 transition-transform overflow-hidden">
-          <img src="/logo.jpeg" alt="Logo" className="w-full h-full object-cover" />
+          <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
         </Link>
 
         {/* Divider */}
