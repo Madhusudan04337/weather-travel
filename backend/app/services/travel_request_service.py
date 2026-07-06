@@ -320,8 +320,8 @@ class TravelRequestService:
         
         try:
             await self._repo.update_approval(id, existing.approval)
-            # Update TravelRequestStatus to CLOSED
-            updated = await self._repo.update(id, TravelRequestUpdate(status=TravelRequestStatus.CLOSED))
+            # Update TravelRequestStatus to REJECTED
+            updated = await self._repo.update(id, TravelRequestUpdate(status=TravelRequestStatus.REJECTED))
         except RepositoryError as exc:
             raise ServiceError(f"Could not update travel request: {exc.detail}") from exc
             
