@@ -562,10 +562,13 @@ class TravelRequestService:
 
         # Step 5 — Refresh weather and recommendation if relevant fields changed
         needs_weather_refresh = False
+        needs_rec_refresh = False
         if "destination_city" in data.model_fields_set and data.destination_city != existing.destination_city:
             needs_weather_refresh = True
         if "travel_date" in data.model_fields_set and data.travel_date != existing.travel_date:
             needs_weather_refresh = True
+        if "trip_type" in data.model_fields_set and data.trip_type != existing.trip_type:
+            needs_rec_refresh = True
 
         if needs_weather_refresh:
             try:
@@ -598,6 +601,18 @@ class TravelRequestService:
                     logger.exception("Weather integration failed with HTTP error during update")
             except Exception:
                 logger.exception("Weather integration failed during update")
+        elif needs_rec_refresh and updated.weather:
+            # Only trip_type changed, we can reuse existing weather to regenerate recommendation
+            try:
+                from app.schemas.weather import WeatherSummary
+                weather_summary = WeatherSummary(**updated.weather)
+                recommendation = self._recommendation_service.generate_recommendation(weather_summary, updated.trip_type)
+                rec_updated = await self._repo.update_recommendation(updated.id, recommendation)
+                if rec_updated:
+                    updated.recommendation = recommendation.model_dump(mode="json")
+                    logger.info("Attached updated recommendation (due to trip_type change) to travel request %s", updated.id)
+            except Exception:
+                logger.exception("Failed to regenerate recommendation during trip_type update")
 
         logger.info("Travel request updated: %s", id)
         return TravelRequestResponse.from_model(updated)

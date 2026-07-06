@@ -57,7 +57,8 @@ export function TravelRequestEditPage() {
           <TravelRequestForm
             mode="edit"
             initialValues={initialValues}
-            onSuccess={() => navigate(`/requests/${request.id}`)}
+            onSuccess={() => navigate(`/requests/${request.id}`, { replace: true })}
+            onCancel={() => navigate(-1)}
           />
         </CardContent>
       </Card>
