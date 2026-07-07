@@ -160,15 +160,17 @@ export function TravelRequestDetailsPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="flex items-center gap-2 mb-2">
-                      <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-caption font-medium border ${
-                        request.recommendation.risk_level === 'low' ? 'bg-success/10 text-success border-success/20' :
-                        request.recommendation.risk_level === 'medium' ? 'bg-warning/10 text-warning border-warning/20' :
-                        'bg-error/10 text-error border-error/20'
-                      }`}>
-                        {request.recommendation.risk_level === 'low' ? '🟢 Low Risk' :
-                         request.recommendation.risk_level === 'medium' ? '🟡 Medium Risk' :
-                         '🔴 High Risk'}
-                      </span>
+                      {request.recommendation.title !== 'Currently Unavailable' && (
+                        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-caption font-medium border ${
+                          request.recommendation.risk_level === 'low' ? 'bg-success/10 text-success border-success/20' :
+                          request.recommendation.risk_level === 'medium' ? 'bg-warning/10 text-warning border-warning/20' :
+                          'bg-error/10 text-error border-error/20'
+                        }`}>
+                          {request.recommendation.risk_level === 'low' ? '🟢 Low Risk' :
+                           request.recommendation.risk_level === 'medium' ? '🟡 Medium Risk' :
+                           '🔴 High Risk'}
+                        </span>
+                      )}
                     </div>
                     <div className="text-small text-text-primary mt-2">
                       {request.recommendation.message}

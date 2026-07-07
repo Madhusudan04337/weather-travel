@@ -151,8 +151,8 @@ class TravelRequestService:
         else:
             fallback_rec = Recommendation(
                 suitable=False,
-                title="Forecast Unavailable",
-                message="Weather forecast is not available yet because the selected travel date is outside the forecast window. Please check again closer to your travel date.",
+                title="Currently Unavailable",
+                message="Weather insights will be available closer to your travel date. Please check back later.",
                 risk_level="medium"
             )
             await self._repo.update_recommendation(model.id, fallback_rec)
@@ -587,8 +587,8 @@ class TravelRequestService:
                 logger.exception("Weather integration failed with HTTP error during update")
                 fallback_rec = Recommendation(
                     suitable=False,
-                    title="Forecast Unavailable",
-                    message="Weather forecast is not available yet because the selected travel date is outside the forecast window. Please check again closer to your travel date.",
+                    title="Currently Not Available",
+                    message="We'll let you know soon.",
                     risk_level="medium"
                 )
                 await self._repo.update_recommendation(updated.id, fallback_rec)
@@ -597,8 +597,8 @@ class TravelRequestService:
                 logger.exception("Weather integration failed during update")
                 fallback_rec = Recommendation(
                     suitable=False,
-                    title="Forecast Unavailable",
-                    message="Weather forecast is not available yet because the selected travel date is outside the forecast window. Please check again closer to your travel date.",
+                    title="Currently Not Available",
+                    message="We'll let you know soon.",
                     risk_level="medium"
                 )
                 await self._repo.update_recommendation(updated.id, fallback_rec)
