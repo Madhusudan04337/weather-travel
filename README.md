@@ -38,6 +38,10 @@ A weather-aware travel planning application that streamlines the process of requ
 
 ![Workflow](assets/screenshots/workflow.png)
 
+### ER Diagram
+
+![ER Diagram](assets/screenshots/er-diagram.png)
+
 ## 4. Application Screenshots
 
 ### Dashboard
